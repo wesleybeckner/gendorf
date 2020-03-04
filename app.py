@@ -125,9 +125,19 @@ app.layout = html.Div([
     ),
     dcc.Graph(
                 id='violin_plot',
-                figure=make_violin_plot())
-      ],     className='pretty container'
-      )
+                figure=make_violin_plot()),
+    html.Div([
+        html.H6(["Background"]),
+        html.P('Median testing is performed for EBIT on 926 variables that '\
+               'describe 2643 unique prodcuts. Variables with p-values below '\
+               '.01 are used to select products for a hypothetical product '\
+               'portfolio. Annualized EBIT is then calcualted based on the '\
+               'production for 2019 (kg) and an identical weighting of '\
+               'the product distribution for that year.')
+    ], className='mini_container'
+    ),
+    ], className='pretty container'
+    )
 
 app.config.suppress_callback_exceptions = False
 
