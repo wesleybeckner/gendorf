@@ -132,8 +132,7 @@ app.layout = html.Div([
                'describe 2643 unique prodcuts. Variables with p-values below '\
                '.01 are used to select products for a hypothetical product '\
                'portfolio. Annualized EBIT is then calcualted based on the '\
-               'production for 2019 (kg) and an identical weighting of '\
-               'the product distribution for that year.')
+               'production for 2019 (kg).')
     ], className='mini_container'
     ),
     ], className='pretty container'
