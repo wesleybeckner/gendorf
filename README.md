@@ -2,7 +2,7 @@
 
 # Product Margin Dashboard
 
-This is an energy dashboard demo using [Dash](https://plot.ly/products/dash/) 
+This is an [product characterization dashboard](https://gendorf.herokuapp.com) demo using [Dash](https://plot.ly/products/dash/) 
 
 ## Getting Started
 
