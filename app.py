@@ -74,7 +74,7 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
         y = local_df.iloc[index]['descriptor'] + ': ' + df.loc[(df[local_df.iloc\
             [index]['descriptor']] == local_df.iloc[index]['group'])]\
             [local_df.iloc[index]['descriptor']]
-        name = 'EBIT: {:.0f}, P{}'.format(x.median(),
+        name = 'EBIT: {:.0f}, {}'.format(x.median(),
             local_df.iloc[index]['group'])
         fig.add_trace(go.Violin(x=y,
                                 y=x,
@@ -219,7 +219,7 @@ def update_descriptor_choices(descriptors):
     [Input('select', 'value')]
 )
 def display_descriptor_number(select):
-    return "Number of Descriptors: {}".format(select[1])
+    return "Number of Descriptors: {}".format(select[1]-select[0])
 
 @app.callback(
     Output('violin_plot', 'figure'),
