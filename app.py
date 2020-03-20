@@ -8,6 +8,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 
 import pandas as pd
 import numpy as np
@@ -19,21 +20,28 @@ app = dash.Dash(
 server = app.server
 
 df = pd.read_csv('data/products.csv')
+production_df = df
 descriptors = df.columns[:8]
 stat_df = pd.read_csv('data/category_stats.csv')
 old_products = df[descriptors].sum(axis=1).unique().shape[0]
 
-def calculate_opportunity(sort='Worst', select=[0,10]):
+def calculate_opportunity(sort='Worst', select=[0,10], descriptors=None):
     if sort == 'Best':
         local_df = stat_df.sort_values('score', ascending=False)
         local_df = local_df.reset_index(drop=True)
+    else:
+        local_df = stat_df
+    if descriptors != None:
+        local_df = local_df.loc[local_df['descriptor'].isin(descriptors)]
+    if sort == 'Best':
+
         new_df = pd.DataFrame()
         for index in range(select[0],select[1]):
             x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
                 local_df.iloc[index]['group'])]
             new_df = pd.concat([new_df, x])
     else:
-        local_df = stat_df
+
         new_df = df
         for index in range(select[0],select[1]):
             new_df = new_df.loc[~(new_df[local_df.iloc[index]['descriptor']] ==\
@@ -50,12 +58,15 @@ def calculate_opportunity(sort='Worst', select=[0,10]):
            "{}".format(new_products), \
            "{:.01f}%".format(product_percent_reduction)
 
-def make_violin_plot(sort='Worst', select=[0,10]):
+def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
+
     if sort == 'Best':
         local_df = stat_df.sort_values('score', ascending=False)
         local_df = local_df.reset_index(drop=True)
     else:
         local_df = stat_df
+    if descriptors != None:
+        local_df = local_df.loc[local_df['descriptor'].isin(descriptors)]
     fig = go.Figure()
     for index in range(select[0],select[1]):
         x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
@@ -77,6 +88,21 @@ def make_violin_plot(sort='Worst', select=[0,10]):
                 })
     return fig
 
+def make_sunburst_plot(clickData=None):
+    if clickData != None:
+        col = clickData["points"][0]['x'].split(": ")[0]
+        val = clickData["points"][0]['x'].split(": ")[1]
+    else:
+        col = 'Thickness Material A'
+        val = '47'
+
+    desc = list(descriptors)
+    desc.remove(col)
+    test = production_df.loc[production_df[col] == val]
+    fig = px.sunburst(test, path=desc[:], color='EBIT', title='{}: {}'.format(
+        col, val),
+        color_continuous_scale='RdBu')
+    return fig
 # Describe the layout/ UI of the app
 app.layout = html.Div([
     html.H4(["Product Characterization"]),
@@ -106,6 +132,22 @@ app.layout = html.Div([
     html.Div([
         html.P('Sort product descriptors by selecting (best) products for'\
             'portfolio or eliminating (worst) products from portfolio'),
+        dcc.Dropdown(id='descriptor_dropdown',
+                     options=[{'label': 'Thickness', 'value': 'Thickness Material A'},
+                             {'label': 'Width', 'value': 'Width Material Attri'},
+                             {'label': 'Base Type', 'value': 'Base Type'},
+                             {'label': 'Additional Treatment', 'value': 'Additional Treatment'},
+                             {'label': 'Color', 'value': 'Color Group'},
+                             {'label': 'Product Group', 'value': 'Product Group'},
+                             {'label': 'Base Polymer', 'value': 'Base Polymer'},
+                             {'label': 'Product Family', 'value': 'Product Family'}],
+                     value=['Thickness Material A',
+                            'Width Material Attri', 'Base Type',
+                            'Additional Treatment', 'Color Group',
+                            'Product Group',
+                            'Base Polymer', 'Product Family'],
+                     multi=True,
+                     className="dcc_control"),
         dcc.RadioItems(
                     id='sort',
                     options=[{'label': i, 'value': i} for i in \
@@ -123,22 +165,54 @@ app.layout = html.Div([
         ),
     ], className='mini_container'
     ),
-    dcc.Graph(
-                id='violin_plot',
-                figure=make_violin_plot()),
+    html.Div([
+        dcc.Graph(
+                    id='violin_plot',
+                    figure=make_violin_plot()),
+            ], className='mini_container',
+            ),
+    html.Div([
+        dcc.Graph(
+                    id='sunburst_plot',
+                    figure=make_sunburst_plot()),
+            ], className='mini_container',
+            ),
     html.Div([
         html.H6(["Background"]),
         html.P('Median testing is performed for EBIT on 926 variables that '\
                'describe 2643 unique prodcuts. Variables with p-values below '\
                '.01 are used to select products for a hypothetical product '\
-               'portfolio. Annualized EBIT is then calcualted based on the '\
-               'production for 2019 (kg).')
+               'portfolio. Annualized EBIT is then calculated based on the '\
+               'production for 2019 (kg).'),
+        html.Pre(id='click-data'),
     ], className='mini_container'
     ),
     ], className='pretty container'
     )
 
 app.config.suppress_callback_exceptions = False
+
+@app.callback(
+    Output('sunburst_plot', 'figure'),
+    [Input('violin_plot', 'clickData')])
+def display_sunburst_plot(clickData):
+    return make_sunburst_plot(clickData)
+
+@app.callback(
+    Output('click-data', 'children'),
+    [Input('violin_plot', 'clickData')])
+def display_click_data(clickData):
+    return json.dumps(clickData, indent=2)
+
+@app.callback(
+    [Output('select', 'max'),
+    Output('select', 'value')],
+    [Input('descriptor_dropdown', 'value')]
+)
+def update_descriptor_choices(descriptors):
+    max_value = stat_df.loc[stat_df['descriptor'].isin(descriptors)].shape[0]
+    value = min(10, max_value)
+    return max_value, [0, value]
 
 @app.callback(
     Output('descriptor-number', 'children'),
@@ -150,10 +224,11 @@ def display_descriptor_number(select):
 @app.callback(
     Output('violin_plot', 'figure'),
     [Input('sort', 'value'),
-    Input('select', 'value')]
+    Input('select', 'value'),
+    Input('descriptor_dropdown', 'value')]
 )
-def display_violin_plot(sort, select):
-    return make_violin_plot(sort, select)
+def display_violin_plot(sort, select, descriptors):
+    return make_violin_plot(sort, select, descriptors)
 
 @app.callback(
     [Output('new-rev', 'children'),
@@ -161,10 +236,11 @@ def display_violin_plot(sort, select):
      Output('new-products', 'children'),
      Output('new-products-percent', 'children')],
     [Input('sort', 'value'),
-    Input('select', 'value')]
+    Input('select', 'value'),
+    Input('descriptor_dropdown', 'value')]
 )
-def display_opportunity(sort, select):
-    return calculate_opportunity(sort, select)
+def display_opportunity(sort, select, descriptors):
+    return calculate_opportunity(sort, select, descriptors)
 
 if __name__ == "__main__":
     app.run_server(debug=True)
