@@ -184,7 +184,7 @@ app.layout = html.Div([
                '.01 are used to select products for a hypothetical product '\
                'portfolio. Annualized EBIT is then calculated based on the '\
                'production for 2019 (kg).'),
-        html.Pre(id='click-data'),
+        # html.Pre(id='click-data'),
     ], className='mini_container'
     ),
     ], className='pretty container'
@@ -198,11 +198,11 @@ app.config.suppress_callback_exceptions = False
 def display_sunburst_plot(clickData):
     return make_sunburst_plot(clickData)
 
-@app.callback(
-    Output('click-data', 'children'),
-    [Input('violin_plot', 'clickData')])
-def display_click_data(clickData):
-    return json.dumps(clickData, indent=2)
+# @app.callback(
+#     Output('click-data', 'children'),
+#     [Input('violin_plot', 'clickData')])
+# def display_click_data(clickData):
+#     return json.dumps(clickData, indent=2)
 
 @app.callback(
     [Output('select', 'max'),
