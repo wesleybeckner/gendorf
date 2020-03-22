@@ -106,6 +106,13 @@ def make_sunburst_plot(clickData=None):
 # Describe the layout/ UI of the app
 app.layout = html.Div([
     html.H4(["Product Characterization"]),
+    html.P('Median testing is performed for EBIT on 926 variables that '\
+           'describe 2643 unique prodcuts. Variables with p-values below '\
+           '.01 are used to select products for a hypothetical product '\
+           'portfolio. Annualized EBIT is then calculated based on the '\
+           'production for 2019 (kg). Selecting a product descriptor in the '\
+           'violine plot will return a pareto of all the products made with '\
+           'that descriptor in 2019.'),
     html.Div([
         html.Div([
             html.H6(id='new-rev'), html.P('EBIT')
@@ -177,16 +184,6 @@ app.layout = html.Div([
                     figure=make_sunburst_plot()),
             ], className='mini_container',
             ),
-    html.Div([
-        html.H6(["Background"]),
-        html.P('Median testing is performed for EBIT on 926 variables that '\
-               'describe 2643 unique prodcuts. Variables with p-values below '\
-               '.01 are used to select products for a hypothetical product '\
-               'portfolio. Annualized EBIT is then calculated based on the '\
-               'production for 2019 (kg).'),
-        # html.Pre(id='click-data'),
-    ], className='mini_container'
-    ),
     ], className='pretty container'
     )
 
