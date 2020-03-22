@@ -102,6 +102,11 @@ def make_sunburst_plot(clickData=None):
     fig = px.sunburst(test, path=desc[:], color='EBIT', title='{}: {}'.format(
         col, val),
         color_continuous_scale='RdBu')
+    fig.update_layout({
+                "plot_bgcolor": "#F9F9F9",
+                "paper_bgcolor": "#F9F9F9",
+                "title": 'EBIT by Product Descriptor',
+                })
     return fig
 # Describe the layout/ UI of the app
 app.layout = html.Div([
