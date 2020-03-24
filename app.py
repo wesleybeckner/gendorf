@@ -20,8 +20,11 @@ app = dash.Dash(
 server = app.server
 
 df = pd.read_csv('data/products.csv')
-production_df = df
 descriptors = df.columns[:8]
+production_df = df
+production_df['product'] = production_df[descriptors[2:]].agg('-'.join, axis=1)
+production_df = production_df.sort_values(['Product Family', 'EBIT'], ascending=False)
+
 stat_df = pd.read_csv('data/category_stats.csv')
 old_products = df[descriptors].sum(axis=1).unique().shape[0]
 
@@ -88,16 +91,20 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
                 })
     return fig
 
-def make_sunburst_plot(clickData=None):
+def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
     if clickData != None:
         col = clickData["points"][0]['x'].split(": ")[0]
         val = clickData["points"][0]['x'].split(": ")[1]
-    else:
+    elif col == None:
         col = 'Thickness Material A'
         val = '47'
 
-    desc = list(descriptors)
-    desc.remove(col)
+    desc = list(descriptors[:-2])
+    if col in desc:
+        desc.remove(col)
+    if toAdd != None:
+        for item in toAdd:
+            desc.append(item)
     test = production_df.loc[production_df[col] == val]
     fig = px.sunburst(test, path=desc[:], color='EBIT', title='{}: {}'.format(
         col, val),
@@ -105,9 +112,103 @@ def make_sunburst_plot(clickData=None):
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT by Product Descriptor',
+                "title": 'EBIT, {}: {}'.format(col,val),
                 })
     return fig
+
+def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
+    families = production_df['Product Family'].unique()
+    colors =[
+        '#1f77b4',  # muted blue
+        '#ff7f0e',  # safety orange
+        '#2ca02c',  # cooked asparagus green
+        '#d62728',  # brick red
+        '#9467bd',  # muted purple
+        '#8c564b',  # chestnut brown
+        '#e377c2',  # raspberry yogurt pink
+        '#7f7f7f',  # middle gray
+        '#bcbd22',  # curry yellow-green
+        '#17becf',   # blue-teal
+        '#1f77b4',  # muted blue
+        '#ff7f0e',  # safety orange
+        '#2ca02c',  # cooked asparagus green
+        '#d62728',  # brick red
+    ]
+    grey = ['#7f7f7f']
+    color_dic = {'{}'.format(i): '{}'.format(j) for i, j  in zip(families, colors)}
+    grey_dic =  {'{}'.format(i): '{}'.format('#7f7f7f') for i in families}
+    fig = go.Figure()
+
+
+    if select == None:
+        for data in px.scatter(
+                production_df,
+                x='product',
+                y='EBIT',
+                color='Product Family',
+                color_discrete_map=color_dic,
+                opacity=1).data:
+            fig.add_trace(
+                data
+            )
+
+    elif select != None:
+        for data in px.scatter(
+                production_df,
+                x='product',
+                y='EBIT',
+                color='Product Family',
+                color_discrete_map=color_dic,
+                opacity=0.09).data:
+            fig.add_trace(
+                data
+            )
+
+        if sort == 'Best':
+            local_df = stat_df.sort_values('score', ascending=False)
+        elif sort == 'Worst':
+            local_df = stat_df
+
+
+        new_df = pd.DataFrame()
+        if descriptors != None:
+            local_df = local_df.loc[local_df['descriptor'].isin(descriptors)]
+        for index in select:
+            x = production_df.loc[(production_df[local_df.iloc[index]['descriptor']] == \
+                local_df.iloc[index]['group'])]
+            new_df = pd.concat([new_df, x])
+            new_df = new_df.reset_index(drop=True)
+        for data in px.scatter(
+                new_df,
+                x='product',
+                y='EBIT',
+                color='Product Family',
+                color_discrete_map=color_dic,
+                opacity=1).data:
+            fig.add_trace(
+                data
+            )
+        shapes=[]
+        for index, i in enumerate(new_df['product']):
+            shapes.append({'type': 'line',
+                           'xref': 'x',
+                           'yref': 'y',
+                           'x0': i,
+                           'y0': -4e5,
+                           'x1': i,
+                           'y1': 4e5,
+                           'line':dict(
+                               dash="dot",
+                               color=color_dic[new_df['Product Family'][index]])})
+        fig.update_layout(shapes=shapes)
+    fig.update_layout({
+            "plot_bgcolor": "#F9F9F9",
+            "paper_bgcolor": "#F9F9F9",
+            "title": 'EBIT by Product Family',
+            "height": 750,
+            })
+    return fig
+
 # Describe the layout/ UI of the app
 app.layout = html.Div([
     html.H4(["Product Characterization"]),
@@ -142,51 +243,81 @@ app.layout = html.Div([
     ], className='row container-display'
     ),
     html.Div([
-        html.P('Sort product descriptors by selecting (best) products for'\
-            'portfolio or eliminating (worst) products from portfolio'),
-        dcc.Dropdown(id='descriptor_dropdown',
-                     options=[{'label': 'Thickness', 'value': 'Thickness Material A'},
-                             {'label': 'Width', 'value': 'Width Material Attri'},
-                             {'label': 'Base Type', 'value': 'Base Type'},
-                             {'label': 'Additional Treatment', 'value': 'Additional Treatment'},
-                             {'label': 'Color', 'value': 'Color Group'},
-                             {'label': 'Product Group', 'value': 'Product Group'},
-                             {'label': 'Base Polymer', 'value': 'Base Polymer'},
-                             {'label': 'Product Family', 'value': 'Product Family'}],
-                     value=['Thickness Material A',
-                            'Width Material Attri', 'Base Type',
-                            'Additional Treatment', 'Color Group',
-                            'Product Group',
-                            'Base Polymer', 'Product Family'],
-                     multi=True,
-                     className="dcc_control"),
-        dcc.RadioItems(
-                    id='sort',
-                    options=[{'label': i, 'value': i} for i in \
-                            ['Best', 'Worst']],
-                    value='Worst',
-                    labelStyle={'display': 'inline-block'},
-                    style={"margin-bottom": "10px"},),
-        html.P('Number of Descriptors:', id='descriptor-number'),
-        dcc.RangeSlider(
-                    id='select',
-                    min=0,
-                    max=stat_df.shape[0],
-                    step=1,
-                    value=[0,10],
+        # html.P('Sort product descriptors by selecting (best) products for '\
+        #     'portfolio or eliminating (worst) products from portfolio'),
+        html.Div([
+            html.P('Descriptors'),
+            dcc.Dropdown(id='descriptor_dropdown',
+                         options=[{'label': 'Thickness', 'value': 'Thickness Material A'},
+                                 {'label': 'Width', 'value': 'Width Material Attri'},
+                                 {'label': 'Base Type', 'value': 'Base Type'},
+                                 {'label': 'Additional Treatment', 'value': 'Additional Treatment'},
+                                 {'label': 'Color', 'value': 'Color Group'},
+                                 {'label': 'Product Group', 'value': 'Product Group'},
+                                 {'label': 'Base Polymer', 'value': 'Base Polymer'},
+                                 {'label': 'Product Family', 'value': 'Product Family'}],
+                         value=['Thickness Material A',
+                                'Width Material Attri', 'Base Type',
+                                'Additional Treatment', 'Color Group',
+                                'Product Group',
+                                'Base Polymer', 'Product Family'],
+                         multi=True,
+                         className="dcc_control"),
+            html.P('Number of Descriptors:', id='descriptor-number'),
+            dcc.RangeSlider(
+                        id='select',
+                        min=0,
+                        max=stat_df.shape[0],
+                        step=1,
+                        value=[0,10],
+            ),
+            html.P('Sort by:'),
+            dcc.RadioItems(
+                        id='sort',
+                        options=[{'label': i, 'value': i} for i in \
+                                ['Best', 'Worst']],
+                        value='Best',
+                        labelStyle={'display': 'inline-block'},
+                        style={"margin-bottom": "10px"},),
+                ], className='mini_container',
+                    id='descriptorBlock',
+                ),
+        ], className='row container-display',
         ),
-    ], className='mini_container'
-    ),
     html.Div([
-        dcc.Graph(
-                    id='violin_plot',
-                    figure=make_violin_plot()),
-            ], className='mini_container',
+        html.Div([
+            dcc.Graph(
+                        id='violin_plot',
+                        figure=make_violin_plot()),
+                ], className='mini_container',
+                   id='violin',
+                ),
+        html.Div([
+            dcc.Dropdown(id='length_width_dropdown',
+                        options=[{'label': 'Thickness', 'value': 'Thickness Material A'},
+                                 {'label': 'Width', 'value': 'Width Material Attri'}],
+                        value=['Width Material Attri'],
+                        multi=True,
+                        placeholder="Include in sunburst chart...",
+                        className="dcc_control"),
+            dcc.Graph(
+                        id='sunburst_plot',
+                        figure=make_sunburst_plot()),
+                ], className='mini_container',
+                   id='sunburst',
+                ),
+            ], className='row container-display',
             ),
     html.Div([
+        html.P('Overlay Violin Data:'),
+        daq.BooleanSwitch(
+          id='daq-violin',
+          on=True,
+          style={"margin-bottom": "10px", "margin-left": "0px",
+          'display': 'inline-block'}),
         dcc.Graph(
-                    id='sunburst_plot',
-                    figure=make_sunburst_plot()),
+                    id='ebit_plot',
+                    figure=make_ebit_plot(production_df)),
             ], className='mini_container',
             ),
     ], className='pretty container'
@@ -196,9 +327,22 @@ app.config.suppress_callback_exceptions = False
 
 @app.callback(
     Output('sunburst_plot', 'figure'),
-    [Input('violin_plot', 'clickData')])
-def display_sunburst_plot(clickData):
-    return make_sunburst_plot(clickData)
+    [Input('violin_plot', 'clickData'),
+     Input('length_width_dropdown', 'value'),
+     Input('sort', 'value'),
+     Input('select', 'value'),
+     Input('descriptor_dropdown', 'value')])
+def display_sunburst_plot(clickData, toAdd, sort, select, descriptors):
+    if sort == 'Best':
+        local_df = stat_df.sort_values('score', ascending=False)
+        local_df = local_df.reset_index(drop=True)
+    else:
+        local_df = stat_df
+    if descriptors != None:
+        local_df = local_df.loc[local_df['descriptor'].isin(descriptors)]
+    col = local_df['descriptor'][select[0]]
+    val = local_df['group'][select[0]]
+    return make_sunburst_plot(clickData, toAdd, col, val)
 
 # @app.callback(
 #     Output('click-data', 'children'),
@@ -231,6 +375,20 @@ def display_descriptor_number(select):
 )
 def display_violin_plot(sort, select, descriptors):
     return make_violin_plot(sort, select, descriptors)
+
+@app.callback(
+    Output('ebit_plot', 'figure'),
+    [Input('sort', 'value'),
+    Input('select', 'value'),
+    Input('descriptor_dropdown', 'value'),
+    Input('daq-violin', 'on')]
+)
+def display_ebit_plot(sort, select, descriptors, switch):
+    if switch == True:
+        select = list(np.arange(select[0],select[1]))
+        return make_ebit_plot(production_df, select, sort=sort, descriptors=descriptors)
+    else:
+        return make_ebit_plot(production_df)
 
 @app.callback(
     [Output('new-rev', 'children'),

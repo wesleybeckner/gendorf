@@ -107,6 +107,29 @@ body {
   flex-direction: column;
 }
 
+#violin {
+  flex: 2;
+}
+
+#descriptorBlock {
+  flex: 2;
+}
+
+#bestOrWorstBlock {
+  flex: 1;
+}
+
+#descriptorRangeBlock {
+  flex: 1;
+}
+
+#daqSwitchBlock {
+  flex: 1;
+}
+#sunburst {
+  flex: 1;
+}
+
 #rev {
   flex: 1;
 }
