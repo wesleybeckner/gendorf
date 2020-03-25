@@ -13,6 +13,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import datetime
+from itertools import cycle
 
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
@@ -89,6 +90,7 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
                 "paper_bgcolor": "#F9F9F9",
                 "title": 'EBIT by Product Descriptor',
                 })
+    
     return fig
 
 def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
@@ -118,22 +120,8 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
 
 def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
     families = production_df['Product Family'].unique()
-    colors =[
-        '#1f77b4',  # muted blue
-        '#ff7f0e',  # safety orange
-        '#2ca02c',  # cooked asparagus green
-        '#d62728',  # brick red
-        '#9467bd',  # muted purple
-        '#8c564b',  # chestnut brown
-        '#e377c2',  # raspberry yogurt pink
-        '#7f7f7f',  # middle gray
-        '#bcbd22',  # curry yellow-green
-        '#17becf',   # blue-teal
-        '#1f77b4',  # muted blue
-        '#ff7f0e',  # safety orange
-        '#2ca02c',  # cooked asparagus green
-        '#d62728',  # brick red
-    ]
+    colors = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
+    colors_cycle = cycle(colors)
     grey = ['#7f7f7f']
     color_dic = {'{}'.format(i): '{}'.format(j) for i, j  in zip(families, colors)}
     grey_dic =  {'{}'.format(i): '{}'.format('#7f7f7f') for i in families}
@@ -153,11 +141,13 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
             )
 
     elif select != None:
+        color_dic = {'{}'.format(i): '{}'.format(j) for i, j  in zip(select, colors)}
         for data in px.scatter(
                 production_df,
                 x='product',
                 y='EBIT',
                 color='Product Family',
+
                 color_discrete_map=color_dic,
                 opacity=0.09).data:
             fig.add_trace(
@@ -176,6 +166,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for index in select:
             x = production_df.loc[(production_df[local_df.iloc[index]['descriptor']] == \
                 local_df.iloc[index]['group'])]
+            x['color'] = next(colors_cycle) # for line shapes
             new_df = pd.concat([new_df, x])
             new_df = new_df.reset_index(drop=True)
         for data in px.scatter(
@@ -183,12 +174,14 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
                 x='product',
                 y='EBIT',
                 color='Product Family',
+
                 color_discrete_map=color_dic,
                 opacity=1).data:
             fig.add_trace(
                 data
             )
         shapes=[]
+
         for index, i in enumerate(new_df['product']):
             shapes.append({'type': 'line',
                            'xref': 'x',
@@ -199,7 +192,8 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
                            'y1': 4e5,
                            'line':dict(
                                dash="dot",
-                               color=color_dic[new_df['Product Family'][index]])})
+                               color=new_df['color'][index],)})
+                               # color=color_dic[new_df['Product Family'][index]])})
         fig.update_layout(shapes=shapes)
     fig.update_layout({
             "plot_bgcolor": "#F9F9F9",
