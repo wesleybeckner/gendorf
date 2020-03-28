@@ -23,6 +23,12 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 app = dash.Dash(
     __name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}]
 )
+
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
+
 server = app.server
 
 opp = pd.read_csv('data/opportunity.csv', index_col=[0,1,2,3])
