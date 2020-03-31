@@ -639,8 +639,8 @@ app.layout = html.Div([
     can have a very high margin, super. but if it takes you 4x as long to make it
     vs other products your margin velocity is a lot less than you think it is.
     Margin velocity gives you a sense of which products should be growing and
-    which ones should be gotten rid of. For example, in the default view of the
-    following chart, we would like prioritize all products appearing to the right,
+    which ones should be removed. For example, in the default view of the
+    following chart, we would like to prioritize all products appearing to the right,
     (high EBITDA per Hr) pushing them further up the y-axis (Adjusted EBITDA) by
     increasing their Size (production volume).
     '''),
@@ -709,8 +709,8 @@ app.layout = html.Div([
             ),
     html.H4(["Line Performance"]),
     dcc.Markdown('''
-    **Newest and most state-of-the-art line is E27 K06, & K17 are the best-run
-    lines with stable yield, uptime, and rate performance relative to the others
+    **Newest and most state-of-the-art lines are E27, K06, & K17
+    with stable yield, uptime, and rate performance relative to the others
     – K40, E26, E28, K10 appear to have the most upside opportunity.**
 
     Priority for capturing increased asset capability should be on Lines E27, K40 -
@@ -720,7 +720,7 @@ app.layout = html.Div([
     improvement terms to capture hidden plant opportunities (increases in yield, uptime and rate).
 
     In the following charts, selecting a quantile on the range bar will update
-    the predicted opportunity potential. Selecting a line in the Annualized opportunity
+    the predicted upside. Selecting a line in the Annualized opportunity
     chart will pareto out product family areas where the opportunity falls.
     '''),
     html.Div([
@@ -784,7 +784,7 @@ app.layout = html.Div([
             ),
     html.H6("Rate, Yield, & Uptime"),
     dcc.Markdown('''
-    The above opportunity comes from tightening distributions around rate, yield,
+    The afformentioned opportunity comes from tightening distributions around rate, yield,
     and uptime. The key takeaway from this section is identifying where those
     broad distributions take place. In the default view, K40 is shown to have
     wide distributions around rate and yield. Switching the Line view to E27 will
@@ -852,6 +852,10 @@ app.layout = html.Div([
             "available to remove uptime consideration. In this case, uptime "\
             "can be manually inputed, with a maximum value based on the "\
             "downtime days for that line in 2019."),
+    dcc.Markdown('''
+    The sunburst chart to the right shows the product overlap for the two
+    selected lines.
+    '''),
     html.Div([
         html.Div([
             html.Div([
