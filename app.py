@@ -60,7 +60,7 @@ stat_df = pd.read_csv('data/category_stats.csv')
 old_products = df[descriptors].sum(axis=1).unique().shape[0]
 weight_match = pd.read_csv('data/weight_match.csv')
 
-def make_bubble_chart(x='Rate', y='Adjusted EBITDA', color='Line',
+def make_bubble_chart(x='EBITDA per Hr Rank', y='Adjusted EBITDA', color='Line',
                       size='Net Sales Quantity in KG'):
 
     fig = px.scatter(weight_match, x=x, y=y, color=color, size=size)
@@ -492,15 +492,31 @@ def calculate_opportunity(quantile=0.9):
 # Describe the layout/ UI of the app
 
 app.layout = html.Div([
-    html.H3(["Margin Analysis"]),
-    html.H4(["Product Descriptors"]),
-    html.P("Product descriptors are sorted by best or worst EBIT medians. "\
-        "Selecting these descriptors automatically computes annualized EBIT. "\
-        "For example, selecting the best 10 descriptors accounts for 102% of "\
-        "the annual EBIT, 7% of available products, and 19% of the total "\
-        "production volume. Conversely, eliminating the 10 worst descriptor "\
-        "products results in a remaining product portfolio that accounts for "\
-        "168% of EBIT, 77% of products, and 84% of volume."),
+    html.H3(["Product Margin Optimization"]),
+    dcc.Markdown('''There appear to be a fair number of low to negative margin products
+    that should be reviewed. All groups &#150 business, manufacturing, supply
+    chain &#150 need to work together to improve these margins by using a combination
+    of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
+    '''),
+    html.P("This section showcases margin disparity and how products "\
+    "can be conceptualized into buckets that differentiate their engagement with these levers."),
+    dcc.Markdown("The default view of the following interactive charts show that of all "\
+    "possible combinations of thicknesses, widths, base types, treatments, colors, "\
+    "polymers and product groups and families, **53 were statistically influential "\
+    "on EBITDA.** Ex: Selecting all products that are described by the 10 most positively "\
+    "influential of those descriptors accounts for 102% of EBIT for 2019 and 20% "\
+    "of the production volume i.e. a significant production effort is spent on "\
+    "products that do not give a positive contribution to EBIT/EBITDA."),
+    dcc.Markdown('''
+    ------
+    * Descriptors can be selected from 8 categories:
+        * thickness, width, base type, treatment, color, polymer, product family & group
+    * Descriptors are sorted by either best (describe high EBIT products) or
+    worst (describe low EBIT products)
+    * The range bar updates what descriptors are shown in the violin plot and EBIT
+    by Product Family Plot as well as what is calculated in EBIT, unique products, and volume displays
+    '''),
+
     html.Div([
         html.Div([
             html.H6(id='margin-new-rev'), html.P('EBIT')
@@ -559,6 +575,20 @@ app.layout = html.Div([
                 ),
         ], className='row container-display',
         ),
+    dcc.Markdown('''
+    A violin plot of EBIT values is constructed of each descriptor
+    selected by the range bar above. A violin plot is a method of plotting
+    distributions. It is similar to a box plot, with the addition of a rotated
+    kernel density plot on each side. Clicking on a distribution in the violin
+    plot expands the sunburst chart to its right. A sunburst chart is a way of
+    representing hierarchical data structures. In this case it is showing the
+    product breakdown for a given descriptor. For instance, products with base
+    types of 202/14 fall within the Construction category, with PVC polymer, ZZZ
+    treatment, and OP color. The bandwidths that lie on each ring indicate the
+    production volume fraction for that given descriptor while color indicates
+    the average EBIT for all products described by that section of the sunburst.
+    Thickness and width can be toggled on the sunburst chart for clarity.
+    '''),
     html.Div([
         html.Div([
             dcc.Graph(
@@ -583,6 +613,13 @@ app.layout = html.Div([
                 ),
             ], className='row container-display',
             ),
+    dcc.Markdown('''
+    Descriptors in the violin plot are overlayed onto this EBIT by Product Family
+    chart. In this way, how product descriptors fall within the broader portfolio
+    can be evaluated. For example, simply toggling the best/worst rank selector above
+    will alternate highlighting the high margin and negative margin products within
+    each family, respectively.
+    '''),
     html.Div([
         html.P('Overlay Violin Data:'),
         daq.BooleanSwitch(
@@ -595,7 +632,17 @@ app.layout = html.Div([
                     figure=make_ebit_plot(production_df)),
             ], className='mini_container',
             ),
-    html.H4(["Margin by Line"]),
+    html.H4(["Margin Velocity"]),
+    dcc.Markdown('''
+    On this graph we are looking at margin velocity by product / line. A product
+    can have a very high margin, super. but if it takes you 4x as long to make it
+    vs other products your margin velocity is a lot less than you think it is.
+    Margin velocity gives you a sense of which products should be growing and
+    which ones should be gotten rid of. For example, in the default view of the
+    following chart, we would like prioritize all products appearing to the right,
+    (high EBITDA per Hr) pushing them further up the y-axis (Adjusted EBITDA) by
+    increasing their Size (production volume).
+    '''),
     html.Div([
         html.Div([
             html.Div([
@@ -604,7 +651,7 @@ app.layout = html.Div([
                              options=[{'label': i, 'value': i} for i in \
                                         ['Rate', 'Yield', 'EBITDA per Hr Rank',\
                                          'Adjusted EBITDA', 'Net Sales Quantity in KG']],
-                            value='Rate',),
+                            value='EBITDA per Hr Rank',),
                      ],  className='mini_container',
                          id='x-select-box',
                      ),
