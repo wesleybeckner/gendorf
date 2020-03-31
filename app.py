@@ -588,6 +588,14 @@ app.layout = html.Div([
     production volume fraction for that given descriptor while color indicates
     the average EBIT for all products described by that section of the sunburst.
     Thickness and width can be toggled on the sunburst chart for clarity.
+
+    ------
+
+    Descriptors in the violin plot are overlayed onto the EBIT by Product Family
+    chart. In this way, how product descriptors fall within the broader portfolio
+    can be evaluated. For example, simply toggling the best/worst rank selector above
+    will alternate highlighting the high margin and negative margin products within
+    each family, respectively.
     '''),
     html.Div([
         html.Div([
@@ -613,13 +621,6 @@ app.layout = html.Div([
                 ),
             ], className='row container-display',
             ),
-    dcc.Markdown('''
-    Descriptors in the violin plot are overlayed onto this EBIT by Product Family
-    chart. In this way, how product descriptors fall within the broader portfolio
-    can be evaluated. For example, simply toggling the best/worst rank selector above
-    will alternate highlighting the high margin and negative margin products within
-    each family, respectively.
-    '''),
     html.Div([
         html.P('Overlay Violin Data:'),
         daq.BooleanSwitch(
@@ -687,6 +688,10 @@ app.layout = html.Div([
         ], className='mini_container',
         ),
     html.H3(["Asset Performance"]),
+    dcc.Markdown('''
+    Unutilized capacity should be monetized.
+    * If sales can not come through with additional volumes, Lines such as E26, K06 should be considered for Consolidation. There is evidence to suggest that consolidating these lines into higher performing lines is possible
+    '''),
     html.H4("Variables to Consider"),
     html.P("Scores reflect whether a group (line or product family) is "\
            "improving or degrading the indicated metric (uptime, rate, yield). "\
