@@ -687,7 +687,7 @@ app.layout = html.Div([
         ),
         ], className='mini_container',
         ),
-    html.H3(["Asset Performance"]),
+    html.H3(["Asset Performance Analysis"]),
     dcc.Markdown('''
     Unutilized capacity should be monetized.
     * If sales can not come through with additional volumes, Lines such as E26, K06 should be considered for Consolidation. There is evidence to suggest that consolidating these lines into higher performing lines is possible
@@ -707,7 +707,7 @@ app.layout = html.Div([
         html.Pre(id='click-data'),
             ], className='mini_container',
             ),
-    html.H4(["Opportunity"]),
+    html.H4(["Line Performance"]),
     dcc.Markdown('''
     **Newest and most state-of-the-art line is E27 K06, & K17 are the best-run
     lines with stable yield, uptime, and rate performance relative to the others
@@ -782,7 +782,7 @@ app.layout = html.Div([
                 ),
             ], className='row container-display',
             ),
-    html.H4("Rate, Yield, & Uptime"),
+    html.H6("Rate, Yield, & Uptime"),
     dcc.Markdown('''
     The above opportunity comes from tightening distributions around rate, yield,
     and uptime. The key takeaway from this section is identifying where those
@@ -843,7 +843,7 @@ app.layout = html.Div([
             ], className='mini_container',
                 id='util',
             ),
-    html.H4("Line Consolidation"),
+    html.H4("Potential Line Consolidations"),
     html.P("With the given line performances there is an opportunity for "\
             "consolidation. 'Days Needed' are computed from rate, yield and "\
             "the total production for 'Line to Remove' in 2019. "\
