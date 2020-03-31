@@ -295,7 +295,7 @@ def make_product_sunburst(lines=['E27', 'E26']):
      })
     return fig
 
-def make_metric_plot(line='K40', pareto='Product', marginal='rug'):
+def make_metric_plot(line='K40', pareto='Product', marginal='histogram'):
     plot = oee.loc[oee['Line'] == line]
     plot = plot.sort_values('Thickness Material A')
     plot['Thickness Material A'] = pd.to_numeric(plot['Thickness Material A'])
@@ -708,16 +708,21 @@ app.layout = html.Div([
             ], className='mini_container',
             ),
     html.H4(["Opportunity"]),
-    html.P("Opportunity (days of additional production) is computed from "\
-            "distributions around uptime, yield, and rate with respect to "\
-            "each of the lines and their product families. Some lines perform "\
-            "very well (E27 and K06) and already perform near their upper "\
-            "quantile ranges. Other lines (K10, E28) have a lot of hidden "\
-            "capacity due to wide variability in their operation. The "\
-            "additional days of production should be interpreted as untapped "\
-            "potential. For instance, If all lines were to perform in their "\
-            "0.82 quantile bracket, the plant would gain the equivalent of "\
-            "running an additional line for an entire calendar year.  "),
+    dcc.Markdown('''
+    **Newest and most state-of-the-art line is E27 K06, & K17 are the best-run
+    lines with stable yield, uptime, and rate performance relative to the others
+    – K40, E26, E28, K10 appear to have the most upside opportunity.**
+
+    Priority for capturing increased asset capability should be on Lines E27, K40 -
+    This will take a sharper focus on true continuous improvement.
+    The organization tracks daily operating parameters, but there does not appear
+    to be a concerted effort with a project mentality on thinking in strategical
+    improvement terms to capture hidden plant opportunities (increases in yield, uptime and rate).
+
+    In the following charts, selecting a quantile on the range bar will update
+    the predicted opportunity potential. Selecting a line in the Annualized opportunity
+    chart will pareto out product family areas where the opportunity falls.
+    '''),
     html.Div([
         html.Div([
             html.H6(id='new-rev'), html.P('Total Days of Production Saved')
@@ -778,6 +783,15 @@ app.layout = html.Div([
             ], className='row container-display',
             ),
     html.H4("Rate, Yield, & Uptime"),
+    dcc.Markdown('''
+    The above opportunity comes from tightening distributions around rate, yield,
+    and uptime. The key takeaway from this section is identifying where those
+    broad distributions take place. In the default view, K40 is shown to have
+    wide distributions around rate and yield. Switching the Line view to E27 will
+    show how this contrasts with a much better performing line.
+
+    The bottom chart shows the utilization for all lines in 2019.
+    '''),
     html.Div([
         html.Div([
             html.Div([
@@ -806,7 +820,7 @@ app.layout = html.Div([
                                      {'label': 'Box', 'value': 'box'},
                                      {'label': 'Violin', 'value': 'violin'},
                                     {'label': 'Histogram', 'value': 'histogram'}],
-                            value='none',
+                            value='histogram',
                              style={'width': '120px'}),
                     ],className='mini_container',
                       id='marginal-box',
