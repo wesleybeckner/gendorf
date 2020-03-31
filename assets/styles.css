@@ -115,6 +115,18 @@ body {
   flex: 1;
 }
 
+#x-select-box {
+  flex: 1;
+}
+
+#y-select-box {
+  flex: 1;
+}
+
+#color-select-box {
+  flex: 1;
+}
+
 #line-box {
   flex: 1;
 }

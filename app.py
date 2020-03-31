@@ -58,6 +58,19 @@ production_df = production_df.sort_values(['Product Family', 'EBIT'],
 
 stat_df = pd.read_csv('data/category_stats.csv')
 old_products = df[descriptors].sum(axis=1).unique().shape[0]
+weight_match = pd.read_csv('data/weight_match.csv')
+
+def make_bubble_chart(x='Rate', y='Adjusted EBITDA', color='Line',
+                      size='Net Sales Quantity in KG'):
+
+    fig = px.scatter(weight_match, x=x, y=y, color=color, size=size)
+    fig.update_layout({
+                "plot_bgcolor": "#F9F9F9",
+                "paper_bgcolor": "#F9F9F9",
+                # "title": 'EBIT by Product Descriptor',
+                })
+
+    return fig
 
 def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
     if sort == 'Best':
@@ -480,6 +493,7 @@ def calculate_opportunity(quantile=0.9):
 
 app.layout = html.Div([
     html.H3(["Margin Analysis"]),
+    html.H4(["Product Descriptors"]),
     html.P("Product descriptors are sorted by best or worst EBIT medians. "\
         "Selecting these descriptors automatically computes annualized EBIT. "\
         "For example, selecting the best 10 descriptors accounts for 102% of "\
@@ -581,6 +595,50 @@ app.layout = html.Div([
                     figure=make_ebit_plot(production_df)),
             ], className='mini_container',
             ),
+    html.H4(["Margin by Line"]),
+    html.Div([
+        html.Div([
+            html.Div([
+                html.P('X-axis'),
+                dcc.Dropdown(id='x-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['Rate', 'Yield', 'EBITDA per Hr Rank',\
+                                         'Adjusted EBITDA', 'Net Sales Quantity in KG']],
+                            value='Rate',),
+                     ],  className='mini_container',
+                         id='x-select-box',
+                     ),
+            html.Div([
+                html.P('Y-axis'),
+                dcc.Dropdown(id='y-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['EBITDA per Hr', 'Adjusted EBITDA',\
+                                         'Net Sales Quantity in KG']],
+                            value='Adjusted EBITDA',),
+                    ],className='mini_container',
+                      id='y-select-box',
+                    ),
+            html.Div([
+                html.P('Color'),
+                dcc.Dropdown(id='color-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['Line', 'Thickness Material A',\
+                                         'Width Material Attri', 'Product Family']],
+                            value='Line',),
+                    ],className='mini_container',
+                      id='color-select-box',
+                    ),
+            ], className='row container-display',
+            ),
+        ],
+        ),
+    html.Div([
+        dcc.Graph(
+            id='bubble_plot',
+            figure=make_bubble_chart(),
+        ),
+        ], className='mini_container',
+        ),
     html.H3(["Asset Performance"]),
     html.H4("Variables to Consider"),
     html.P("Scores reflect whether a group (line or product family) is "\
@@ -869,6 +927,15 @@ def display_opportunity(sort, select, descriptors):
 )
 def display_opportunity(line, pareto, marginal):
     return make_metric_plot(line, pareto, marginal)
+
+@app.callback(
+    Output('bubble_plot', 'figure'),
+    [Input('x-select', 'value'),
+    Input('y-select', 'value'),
+    Input('color-select', 'value')]
+)
+def display_opportunity(x, y, color):
+    return make_bubble_chart(x, y, color)
 
 @app.callback(
     [Output('new-rev', 'children'),
