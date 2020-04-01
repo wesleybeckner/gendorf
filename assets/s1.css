@@ -525,6 +525,10 @@ on small devices, paste the mobile query code up in the buttons section and styl
 there.
 */
 
+/* mobile, screen sizes 375px */
+@media (min-width: 375px) {
+}
+
 /* Larger than mobile, screen sizes larger than 400px */
 @media (min-width: 400px) {
 }

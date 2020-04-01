@@ -493,30 +493,40 @@ def calculate_opportunity(quantile=0.9):
 
 app.layout = html.Div([
     html.H3(["Product Margin Optimization"]),
-    dcc.Markdown('''There appear to be a fair number of low to negative margin products
-    that should be reviewed. All groups &#150 business, manufacturing, supply
-    chain &#150 need to work together to improve these margins by using a combination
-    of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
-    '''),
-    html.P("This section showcases margin disparity and how products "\
-    "can be conceptualized into buckets that differentiate their engagement with these levers."),
-    dcc.Markdown("The default view of the following interactive charts show that of all "\
-    "possible combinations of thicknesses, widths, base types, treatments, colors, "\
-    "polymers and product groups and families, **53 were statistically influential "\
-    "on EBITDA.** Ex: Selecting all products that are described by the 10 most positively "\
-    "influential of those descriptors accounts for 102% of EBIT for 2019 and 20% "\
-    "of the production volume i.e. a significant production effort is spent on "\
-    "products that do not give a positive contribution to EBIT/EBITDA."),
-    dcc.Markdown('''
-    ------
-    * Descriptors can be selected from 8 categories:
-        * thickness, width, base type, treatment, color, polymer, product family & group
-    * Descriptors are sorted by either best (describe high EBIT products) or
-    worst (describe low EBIT products)
-    * The range bar updates what descriptors are shown in the violin plot and EBIT
-    by Product Family Plot as well as what is calculated in EBIT, unique products, and volume displays
-    '''),
+dcc.Markdown('''
+**Key Finding:** There are a fair number of low to negative margin products
+that should be reviewed. All groups &#150 business, manufacturing, supply
+chain &#150 need to work together to improve these margins by using a combination
+of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
+'''),
+html.Div([
+dcc.Markdown('''
+>
+>This section demonstrates margin disparity and how products can be conceptualized
+>into buckets that orient their relationship to margin levers.
+>
 
+The default view of the following interactive charts show that of all
+possible combinations of thicknesses, widths, base types, treatments, colors,
+polymers and product groups and families, **53 were statistically influential
+on EBITDA.** Ex: Selecting all products that are described by the 10 most positively
+influential of those descriptors accounts for 102% of EBIT for 2019 and 20%
+of the production volume i.e. a significant production effort is spent on
+products that do not give a positive contribution to EBIT/EBITDA. **All 53 descriptors
+are made available here for the user to interact with.**
+
+------
+
+* Descriptors can be selected from 8 categories:
+    * thickness, width, base type, treatment, color, polymer, product family & group
+* Descriptors are sorted by either best (describe high EBIT products) or
+worst (describe low EBIT products)
+* The range bar updates what descriptors are shown in the violin plot and EBIT
+by Product Family Plot as well as what is calculated in EBIT, unique products, and volume displays
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             html.H6(id='margin-new-rev'), html.P('EBIT')
@@ -575,28 +585,37 @@ app.layout = html.Div([
                 ),
         ], className='row container-display',
         ),
-    dcc.Markdown('''
-    A violin plot of EBIT values is constructed of each descriptor
-    selected by the range bar above. A violin plot is a method of plotting
-    distributions. It is similar to a box plot, with the addition of a rotated
-    kernel density plot on each side. Clicking on a distribution in the violin
-    plot expands the sunburst chart to its right. A sunburst chart is a way of
-    representing hierarchical data structures. In this case it is showing the
-    product breakdown for a given descriptor. For instance, products with base
-    types of 202/14 fall within the Construction category, with PVC polymer, ZZZ
-    treatment, and OP color. The bandwidths that lie on each ring indicate the
-    production volume fraction for that given descriptor while color indicates
-    the average EBIT for all products described by that section of the sunburst.
-    Thickness and width can be toggled on the sunburst chart for clarity.
+html.Div([
+dcc.Markdown('''
+A violin plot of EBIT values is constructed of each descriptor
+selected by the range bar above. A violin plot is a method of plotting
+distributions. It is similar to a box plot, with the addition of a rotated
+kernel density (kde) plot on each side. **The benefit of the kde is to visualize
+the density of the data without obstructing key outliers *(ex: 200-400K EBIT
+outliers in 2D Coil Coating and Base Type 153/07)* **
+Clicking on a distribution in the violin
+plot expands the sunburst chart to its right. A sunburst chart is a way of
+representing hierarchical data structures. In this case it is showing the
+product breakdown for a given descriptor. For instance, products with base
+types of 202/14 fall within the Construction category, with PVC polymer, ZZZ
+treatment, and OP color. The bandwidths that lie on each ring indicate the
+production volume fraction for that given descriptor while color indicates
+the average EBIT for all products described by that section of the sunburst (ex:
+in the default view, highest EBIT base type 202/14 products have a width of 955
+while lowest EBIT have a thickness of 400 and each of these count for 1 production
+run out of 23 for this product group). Thickness and width can be toggled on the sunburst chart for clarity.
 
-    ------
+------
 
-    Descriptors in the violin plot are overlayed onto the EBIT by Product Family
-    chart. In this way, how product descriptors fall within the broader portfolio
-    can be evaluated. For example, simply toggling the best/worst rank selector above
-    will alternate highlighting the high margin and negative margin products within
-    each family, respectively.
-    '''),
+Descriptors in the violin plot are overlayed onto the EBIT by Product Family
+chart. In this way, product descriptors can be evaluated within the broader portfolio
+(ex: toggling the best/worst rank selector above
+will alternate highlighting the high margin and negative margin products within
+each family, respectively).
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             dcc.Graph(
