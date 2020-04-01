@@ -498,6 +498,9 @@ dcc.Markdown('''
 that should be reviewed. All groups &#150 business, manufacturing, supply
 chain &#150 need to work together to improve these margins by using a combination
 of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
+
+**Implementation Phase:** Caravel partners work with group teams to categorize
+products into discrete buckets. **Est. Impact € 3.5-6 M/Yr**
 '''),
 html.Div([
 dcc.Markdown('''
@@ -513,7 +516,7 @@ on EBITDA.** Ex: Selecting all products that are described by the 10 most positi
 influential of those descriptors accounts for 102% of EBIT for 2019 and 20%
 of the production volume i.e. a significant production effort is spent on
 products that do not give a positive contribution to EBIT/EBITDA. **All 53 descriptors
-are made available here for the user to interact with.**
+are made available here.**
 
 ------
 
@@ -648,12 +651,12 @@ each family, respectively).*
                     figure=make_ebit_plot(production_df)),
             ], className='mini_container',
             ),
-html.H4(["Margin Velocity"]),
+html.H5(["Margin Velocity"]),
 dcc.Markdown('''
 **Key Finding:** There is clear segmentation in line and product families
 in their margin velocity. High EBITDA per Hr product lines should be expanded
 while low EBITDA per Hr product lines should be discontinued or augmented
-with pricing and other levers
+with pricing and other levers.
 '''),
 html.Div([
 dcc.Markdown('''
@@ -716,18 +719,34 @@ increasing their Size (production volume)).*
         ),
         ], className='mini_container',
         ),
-    html.H3(["Asset Performance Analysis"]),
-    dcc.Markdown('''
-    Unutilized capacity should be monetized.
-    * If sales can not come through with additional volumes, Lines such as E26, K06 should be considered for Consolidation. There is evidence to suggest that consolidating these lines into higher performing lines is possible
-    '''),
-    html.H4("Variables to Consider"),
-    html.P("Scores reflect whether a group (line or product family) is "\
-           "improving or degrading the indicated metric (uptime, rate, yield). "\
-           "While groups were determined to be statistically impactful "\
-           "(null hypothesis < 0.01) it does not guarantee decoupling. For "\
-           "instance, PSL has a very negative impact on rate and yield. "\
-           "However, the only line that runs PSL is E28, which is rated similarly."),
+html.H3(["Asset Performance Analysis"]),
+dcc.Markdown('''
+**Key Finding:** If sales can not come through with additional volumes,
+Lines such as E26, K06 should be considered for Consolidation. There is
+evidence to suggest that consolidating these lines into higher performing
+lines is possible.
+
+**Implementation Phase:** Caravel partners will assist in unutilized capacity
+being be monetized. **Est. Impact € 2-4 M/Yr**
+'''),
+html.Div([
+dcc.Markdown('''
+>
+> This section explores key variables that affect Rate, Yield, and uptime
+>
+
+In this graphic, scores reflect whether or not a group (line or product family) is
+improving or uptime, rate, or yield. The statistical test is similar to that
+performed for the product descriptors in the margin analysis.
+
+While groups were determined to be statistically impactful
+(null hypothesis < 0.01) it does not guarantee decoupling. For
+instance, PSL has a very negative impact on rate and yield.
+However, the only line that runs PSL is E28, which is rated similarly.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         dcc.Graph(
                     id='scores_plot',
@@ -736,22 +755,31 @@ increasing their Size (production volume)).*
         html.Pre(id='click-data'),
             ], className='mini_container',
             ),
-    html.H4(["Line Performance"]),
-    dcc.Markdown('''
-    **Newest and most state-of-the-art lines are E27, K06, & K17
-    with stable yield, uptime, and rate performance relative to the others
-    – K40, E26, E28, K10 appear to have the most upside opportunity.**
+html.H5(["Line Performance"]),
+dcc.Markdown('''
+**Key Finding:** Newest and most state-of-the-art lines are E27, K06, & K17
+with stable yield, uptime, and rate performance relative to the others.
+ K40, E26, E28, K10 have the most upside opportunity.
+'''),
+html.Div([
+dcc.Markdown('''
+Unutilized capacity should be monetized. Priority for capturing increased asset
+capability should be on Lines E27, K40 -
+This will take a sharper focus on true continuous improvement.
+The organization tracks daily operating parameters, but there does not appear
+to be a concerted effort with a project mentality on thinking in strategical
+improvement terms to capture hidden plant opportunities (increases in yield, uptime and rate).
 
-    Priority for capturing increased asset capability should be on Lines E27, K40 -
-    This will take a sharper focus on true continuous improvement.
-    The organization tracks daily operating parameters, but there does not appear
-    to be a concerted effort with a project mentality on thinking in strategical
-    improvement terms to capture hidden plant opportunities (increases in yield, uptime and rate).
+------
 
-    In the following charts, selecting a quantile on the range bar will update
-    the predicted upside. Selecting a line in the Annualized opportunity
-    chart will pareto out product family areas where the opportunity falls.
-    '''),
+In the following charts, selecting a quantile on the range bar will update
+the predicted upside. This effectively pushes each line into its upper quantiles
+in relation to rate, yield, and uptime. Selecting a line in the Annualized opportunity
+chart will pareto out product family areas.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             html.H6(id='new-rev'), html.P('Total Days of Production Saved')
@@ -811,16 +839,19 @@ increasing their Size (production volume)).*
                 ),
             ], className='row container-display',
             ),
-    html.H6("Rate, Yield, & Uptime"),
-    dcc.Markdown('''
-    The afformentioned opportunity comes from tightening distributions around rate, yield,
-    and uptime. The key takeaway from this section is identifying where those
-    broad distributions take place. In the default view, K40 is shown to have
-    wide distributions around rate and yield. Switching the Line view to E27 will
-    show how this contrasts with a much better performing line.
+html.Div([
+dcc.Markdown('''
+The afformentioned opportunity comes from tightening distributions around rate, yield,
+and uptime. The key takeaway from this section is identifying where those
+broad distributions take place. In the default view, K40 is shown to have
+wide distributions around rate and yield. Switching the Line view to E27 will
+show how this contrasts with a much better performing line.
 
-    The bottom chart shows the utilization for all lines in 2019.
-    '''),
+The bottom chart shows the utilization for all lines in 2019.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             html.Div([
@@ -872,7 +903,7 @@ increasing their Size (production volume)).*
             ], className='mini_container',
                 id='util',
             ),
-    html.H4("Potential Line Consolidations"),
+    html.H5("Potential Line Consolidations"),
     html.P("With the given line performances there is an opportunity for "\
             "consolidation. 'Days Needed' are computed from rate, yield and "\
             "the total production for 'Line to Remove' in 2019. "\
