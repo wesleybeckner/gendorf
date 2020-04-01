@@ -617,6 +617,18 @@ each family, respectively).*
         ], className='row container-display',
         ),
     html.Div([
+        html.P('Overlay Violin Data:'),
+        daq.BooleanSwitch(
+          id='daq-violin',
+          on=True,
+          style={"margin-bottom": "10px", "margin-left": "0px",
+          'display': 'inline-block'}),
+        dcc.Graph(
+                    id='ebit_plot',
+                    figure=make_ebit_plot(production_df)),
+        ], className='mini_container',
+        ),
+    html.Div([
         html.Div([
             dcc.Graph(
                         id='violin_plot',
@@ -639,18 +651,6 @@ each family, respectively).*
                    id='sunburst',
                 ),
             ], className='row container-display',
-            ),
-    html.Div([
-        html.P('Overlay Violin Data:'),
-        daq.BooleanSwitch(
-          id='daq-violin',
-          on=True,
-          style={"margin-bottom": "10px", "margin-left": "0px",
-          'display': 'inline-block'}),
-        dcc.Graph(
-                    id='ebit_plot',
-                    figure=make_ebit_plot(production_df)),
-            ], className='mini_container',
             ),
 html.H5(["Margin Velocity"]),
 dcc.Markdown('''
