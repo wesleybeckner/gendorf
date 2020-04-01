@@ -520,7 +520,7 @@ are made available here.**
 
 ------
 
-* Descriptors can be selected from 8 categories:
+* Descriptors can be selected from eight categories:
     * thickness, width, base type, treatment, color, polymer, product family & group
 * Descriptors are sorted by either best (describe high EBIT products) or
 worst (describe low EBIT products)
@@ -763,6 +763,11 @@ with stable yield, uptime, and rate performance relative to the others.
 '''),
 html.Div([
 dcc.Markdown('''
+>
+> This section quantifies the opportunity in each line in terms of equivalent
+> days of production
+>
+
 Unutilized capacity should be monetized. Priority for capturing increased asset
 capability should be on Lines E27, K40 -
 This will take a sharper focus on true continuous improvement.
@@ -841,9 +846,12 @@ chart will pareto out product family areas.
             ),
 html.Div([
 dcc.Markdown('''
+>
+>This section identifies where broad distributions are taking place in performance
+>
+
 The afformentioned opportunity comes from tightening distributions around rate, yield,
-and uptime. The key takeaway from this section is identifying where those
-broad distributions take place. In the default view, K40 is shown to have
+and uptime. In the default view, K40 is shown to have
 wide distributions around rate and yield. Switching the Line view to E27 will
 show how this contrasts with a much better performing line.
 
@@ -903,19 +911,33 @@ The bottom chart shows the utilization for all lines in 2019.
             ], className='mini_container',
                 id='util',
             ),
-    html.H5("Potential Line Consolidations"),
-    html.P("With the given line performances there is an opportunity for "\
-            "consolidation. 'Days Needed' are computed from rate, yield and "\
-            "the total production for 'Line to Remove' in 2019. "\
-            "'Days Available' is computed from rate, yield, and uptime "\
-            "improvements in 'Line to Overload'. A manual overide is "\
-            "available to remove uptime consideration. In this case, uptime "\
-            "can be manually inputed, with a maximum value based on the "\
-            "downtime days for that line in 2019."),
-    dcc.Markdown('''
-    The sunburst chart to the right shows the product overlap for the two
-    selected lines.
-    '''),
+html.H5("Potential Line Consolidations"),
+dcc.Markdown('''
+**Key Finding:** The data indicates E26 may be consolidated into E27 and K06 into
+K40.
+'''),
+html.Div([
+dcc.Markdown('''
+>
+> This section uses product overlap and quantile performances to determine
+> line consolidation feasibility.
+>
+
+With the given line performances there is an opportunity for
+consolidation. 'Days Needed' are computed from rate, yield and
+the total production for 'Line to Remove' in 2019.
+'Days Available' is computed from rate, yield, and uptime
+improvements in 'Line to Overload'. A manual overide is
+available to remove uptime consideration. In this case, uptime
+can be manually inputed, with a maximum value based on the
+downtime days for that line in 2019.
+
+The sunburst chart to the right shows the product overlap for the two
+selected lines.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             html.Div([
