@@ -492,15 +492,16 @@ def calculate_opportunity(quantile=0.9):
 # Describe the layout/ UI of the app
 
 app.layout = html.Div([
-    html.H3(["Product Margin Optimization"]),
+html.H1('Gendorf OpEx Assessment Report - Data Storyboard'),
+html.H3(["Product Margin Optimization"]),
 dcc.Markdown('''
 **Key Finding:** There are a fair number of low to negative margin products
 that should be reviewed. All groups &#150 business, manufacturing, supply
 chain &#150 need to work together to improve these margins by using a combination
 of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
 
-**Implementation Phase:** Caravel partners work with group teams to categorize
-products into discrete buckets. **Est. Impact € 3.5-6 M/Yr**
+**Implementation Phase:** Caravel partners work with group teams to strategize
+products around margin levers. **Est. Impact € 3.5-6 M/Yr**
 '''),
 html.Div([
 dcc.Markdown('''
@@ -732,17 +733,17 @@ being be monetized. **Est. Impact € 2-4 M/Yr**
 html.Div([
 dcc.Markdown('''
 >
-> This section explores key variables that affect Rate, Yield, and uptime
+> This section explores key variables that affect rate, yield, and uptime
 >
 
 In this graphic, scores reflect whether or not a group (line or product family) is
-improving or uptime, rate, or yield. The statistical test is similar to that
+improving uptime, rate, or yield. The statistical test is similar to that
 performed for the product descriptors in the margin analysis.
 
 While groups were determined to be statistically impactful
 (null hypothesis < 0.01) it does not guarantee decoupling. For
-instance, PSL has a very negative impact on rate and yield.
-However, the only line that runs PSL is E28, which is rated similarly.
+instance, PSL has a very negative impact on rate and yield, however, the only
+line that runs PSL is E28 and is rated similarly.
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff"},
