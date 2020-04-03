@@ -87,6 +87,7 @@ def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
             x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
                 local_df.iloc[index]['group'])]
             new_df = pd.concat([new_df, x])
+        new_df = new_df.drop_duplicates()
     else:
 
         new_df = df
@@ -94,19 +95,20 @@ def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
             new_df = new_df.loc[~(new_df[local_df.iloc[index]['descriptor']] ==\
                     local_df.iloc[index]['group'])]
 
-    new_EBIT = 1 / (new_df['Sales Quantity in KG'].sum() /
-        df['Sales Quantity in KG'].sum()) * new_df['EBIT'].sum()
+    new_EBITDA = new_df['Adjusted EBITDA'].sum()
+    EBITDA_percent = new_EBITDA / df['Adjusted EBITDA'].sum() * 100
 
-    EBIT_percent = (new_df['EBIT'].sum()) / df['EBIT'].sum() * 100
     new_products = new_df[descriptors].sum(axis=1).unique().shape[0]
+
     product_percent_reduction = (new_products) / \
         old_products * 100
+
     new_kg = new_df['Sales Quantity in KG'].sum()
     old_kg = df['Sales Quantity in KG'].sum()
     kg_percent = new_kg / old_kg * 100
 
-    return "€{:.1f} M of €{:.1f} M ({:.1f}%)".format(new_df['EBIT'].sum()/1e6,
-                df['EBIT'].sum()/1e6, EBIT_percent), \
+    return "€{:.1f} M of €{:.1f} M ({:.1f}%)".format(new_EBITDA/1e6,
+                df['Adjusted EBITDA'].sum()/1e6, EBITDA_percent), \
             "{} of {} Products ({:.1f}%)".format(new_products,old_products,
                 product_percent_reduction),\
             "{:.1f} M of {:.1f} M kg ({:.1f}%)".format(new_kg/1e6, old_kg/1e6,
@@ -124,11 +126,11 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
     fig = go.Figure()
     for index in range(select[0],select[1]):
         x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
-            local_df.iloc[index]['group'])]['EBIT']
+            local_df.iloc[index]['group'])]['Adjusted EBITDA']
         y = local_df.iloc[index]['descriptor'] + ': ' + df.loc[(df[local_df\
             .iloc[index]['descriptor']] == local_df.iloc[index]['group'])]\
             [local_df.iloc[index]['descriptor']]
-        name = 'EBIT: {:.0f}, {}'.format(x.median(),
+        name = '€ {:.0f}, {}'.format(x.median(),
             local_df.iloc[index]['group'])
         fig.add_trace(go.Violin(x=y,
                                 y=x,
@@ -138,7 +140,7 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT by Product Descriptor (Median in Legend)',
+                "title": 'Adjusted EBITDA by Product Descriptor (Median in Legend)',
                 "height": 400,
                 "margin": dict(
                        l=0,
@@ -166,13 +168,13 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
         for item in toAdd:
             desc.append(item)
     test = production_df.loc[production_df[col] == val]
-    fig = px.sunburst(test, path=desc[:], color='EBIT', title='{}: {}'.format(
+    fig = px.sunburst(test, path=desc[:], color='Adjusted EBITDA', title='{}: {}'.format(
         col, val),
         color_continuous_scale='RdBu')
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": '(Select from Violin) EBIT, {}: {}'.format(col,val),
+                "title": '(Select from Violin) Adjusted EBITDA, {}: {}'.format(col,val),
                 "height": 400,
                 "margin": dict(
                        l=0,
@@ -200,7 +202,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 production_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
                 color_discrete_map=color_dic,
                 opacity=1).data:
@@ -214,7 +216,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 production_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
 
                 color_discrete_map=color_dic,
@@ -241,7 +243,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 new_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
 
                 color_discrete_map=color_dic,
@@ -256,9 +258,9 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
                            'xref': 'x',
                            'yref': 'y',
                            'x0': i,
-                           'y0': -3e5,
+                           'y0': -4e5,
                            'x1': i,
-                           'y1': 3e5,
+                           'y1': 4e5,
                            'line':dict(
                                dash="dot",
                                color=new_df['color'][index],)})
@@ -266,8 +268,16 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
     fig.update_layout({
             "plot_bgcolor": "#F9F9F9",
             "paper_bgcolor": "#F9F9F9",
-            "title": 'EBIT by Product Family',
+            "title": 'Adjusted EBITDA by Product Family',
             "height": 500,
+            "margin": dict(
+                   l=0,
+                   r=0,
+                   b=0,
+                   t=30,
+                   pad=4
+),
+            "xaxis.tickfont.size": 8,
             # "font":dict(
             #     size=8,
             # ),
@@ -532,35 +542,34 @@ products around margin levers. **Est. Impact € 3.5-6 M/Yr**
 html.Div([
 dcc.Markdown('''
 >
->Demonstrates margin disparity and how products fit
->into buckets that orient their relationship to margin levers.
+>Demonstrates margin disparity and product buckets.
 >
 
 The default view of the following interactive charts show that of all
 possible combinations of thicknesses, widths, base types, treatments, colors,
 polymers and product groups and families, **53 were statistically influential
 on EBITDA.** Ex: Selecting all products that are described by the 10 most positively
-influential of those descriptors accounts for 102% of EBIT for 2019 and 20%
+influential of those descriptors accounts for 102% of EBITDA for 2019 and 20%
 of the production volume i.e. a significant production effort is spent on
-products that do not give a positive contribution to EBIT/EBITDA. **All 53 descriptors
+products that do not give a positive contribution to EBITDA. **All 53 descriptors
 are made available here.**
 
 ------
 
 * Descriptors can be selected from eight categories:
     * thickness, width, base type, treatment, color, polymer, product family & group
-* Descriptors are sorted by either best (describe high EBIT products) or
-worst (describe low EBIT products)
-* The range bar updates what descriptors are shown in the violin plot and EBIT
-by Product Family Plot as well as what is calculated in EBIT, unique products, and volume displays
+* Descriptors are sorted by either best (describe high EBITDA products) or
+worst (describe low EBITDA products)
+* The range bar updates what descriptors are shown in the violin plot and EBITDA
+by Product Family Plot as well as what is calculated in EBITDA, unique products, and volume displays
 
 ------
 
-A violin plot of EBIT values is constructed of each descriptor
+A violin plot of EBITDA values is constructed of each descriptor
 selected by the range bar. A violin plot is a method of plotting
 distributions. It is similar to a box plot, with the addition of a rotated
 kernel density (kde) plot on each side. **The benefit of the kde is to visualize
-the density of the data without obstructing key outliers** *(ex: 200-400K EBIT
+the density of the data without obstructing key outliers** *(ex: 200-400K EBITDA
 outliers in 2D Coil Coating and Base Type 153/07)*
 
 Clicking on a distribution in the violin
@@ -570,12 +579,12 @@ product breakdown for a given descriptor. For instance, products with base
 types of 202/14 fall within the Construction category, with PVC polymer, ZZZ
 treatment, and OP color. The bandwidths that lie on each ring indicate the
 production volume fraction for that given descriptor while color indicates
-the average EBIT for all products described by that section of the sunburst *(ex:
-in the default view, highest EBIT base type 202/14 products have a width of 955
-while lowest EBIT have a width of 400 and each of these count for 1 production
+the average EBITDA for all products described by that section of the sunburst *(ex:
+in the default view, highest EBITDA base type 202/14 products have a width of 955
+while lowest EBITDA have a width of 400 and each of these count for 1 production
 run out of 23 for this product group).* Thickness and width can be toggled on the sunburst chart for clarity.
 
-Descriptors in the violin plot are overlayed onto the EBIT by Product Family
+Descriptors in the violin plot are overlayed onto the EBITDA by Product Family
 chart. In this way, product descriptors can be evaluated within the broader portfolio
 *(ex: toggling the best/worst rank selector above
 will alternate highlighting the high margin and negative margin products within
@@ -591,7 +600,7 @@ each family, respectively).*
 ),
     html.Div([
         html.Div([
-            html.H6(id='margin-new-rev'), html.P('EBIT')
+            html.H6(id='margin-new-rev'), html.P('Adjusted EBITDA')
         ], className='mini_container',
            id='margin-rev',
 
@@ -640,12 +649,13 @@ each family, respectively).*
             html.P('Sort by:'),
             dcc.RadioItems(
                         id='sort',
-                        options=[{'label': i, 'value': i} for i in \
-                                ['Best', 'Worst']],
+                        options=[{'label': i, 'value': j} for i, j in \
+                                [['Low EBITDA', 'Worst'],
+                                ['High EBITDA', 'Best']]],
                         value='Best',
                         labelStyle={'display': 'inline-block'},
                         style={"margin-bottom": "10px"},),
-            html.P('Toggle Violin/Descriptor Data onto EBIT by Product Family:'),
+            html.P('Toggle Violin/Descriptor Data onto EBITDA by Product Family:'),
             daq.BooleanSwitch(
               id='daq-violin',
               on=True,
