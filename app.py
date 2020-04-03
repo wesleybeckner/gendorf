@@ -513,6 +513,8 @@ def calculate_opportunity(quantile=0.9):
 app.layout = html.Div([
 html.H1('Gendorf OpEx Assessment Report - Data Storyboard'),
 html.H3(["Product Margin Optimization"]),
+html.Div([
+html.Div([
 dcc.Markdown('''
 **Key Finding:** There are a fair number of low to negative margin products
 that should be reviewed. All groups &#150 business, manufacturing, supply
@@ -522,10 +524,15 @@ of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Camp
 **Implementation Phase:** Caravel partners work with group teams to strategize
 products around margin levers. **Est. Impact € 3.5-6 M/Yr**
 '''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+    id='explain1a',
+),
 html.Div([
 dcc.Markdown('''
 >
->This section demonstrates margin disparity and how products can be conceptualized
+>Demonstrates margin disparity and how products fit
 >into buckets that orient their relationship to margin levers.
 >
 
@@ -575,7 +582,12 @@ will alternate highlighting the high margin and negative margin products within
 each family, respectively).*
 '''),
 ], className='pretty_container',
-   style={"background-color": "#ffffff"},
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px",
+          "overflow": "scroll"},
+   id='explain1b',
+),
+], className='row container-display',
 ),
     html.Div([
         html.Div([
