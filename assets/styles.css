@@ -107,6 +107,16 @@ body {
   flex-direction: column;
 }
 
+#descriptorBlock {
+  flex: 1;
+  position: relative;
+}
+
+#ebit-family-block {
+  flex: 5;
+  position: relative;
+}
+
 #pareto {
   flex: 3;
 }
@@ -145,7 +155,7 @@ body {
 }
 
 #opportunity{
-  flex:3;
+  flex: 3;
 }
 
 #violin {

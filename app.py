@@ -105,7 +105,7 @@ def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
     old_kg = df['Sales Quantity in KG'].sum()
     kg_percent = new_kg / old_kg * 100
 
-    return "${:.1f} M of ${:.1f} M ({:.1f}%)".format(new_df['EBIT'].sum()/1e6,
+    return "€{:.1f} M of €{:.1f} M ({:.1f}%)".format(new_df['EBIT'].sum()/1e6,
                 df['EBIT'].sum()/1e6, EBIT_percent), \
             "{} of {} Products ({:.1f}%)".format(new_products,old_products,
                 product_percent_reduction),\
@@ -138,7 +138,15 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT by Product Descriptor',
+                "title": 'EBIT by Product Descriptor (Median in Legend)',
+                "height": 400,
+                "margin": dict(
+                       l=0,
+                       r=0,
+                       b=0,
+                       t=30,
+                       pad=4
+   ),
                 })
 
     return fig
@@ -164,7 +172,15 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT, {}: {}'.format(col,val),
+                "title": '(Select from Violin) EBIT, {}: {}'.format(col,val),
+                "height": 400,
+                "margin": dict(
+                       l=0,
+                       r=0,
+                       b=0,
+                       t=30,
+                       pad=4
+   ),
                 })
     return fig
 
@@ -240,9 +256,9 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
                            'xref': 'x',
                            'yref': 'y',
                            'x0': i,
-                           'y0': -4e5,
+                           'y0': -3e5,
                            'x1': i,
-                           'y1': 4e5,
+                           'y1': 3e5,
                            'line':dict(
                                dash="dot",
                                color=new_df['color'][index],)})
@@ -251,7 +267,10 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
             "plot_bgcolor": "#F9F9F9",
             "paper_bgcolor": "#F9F9F9",
             "title": 'EBIT by Product Family',
-            "height": 750,
+            "height": 500,
+            # "font":dict(
+            #     size=8,
+            # ),
             })
     return fig
 
@@ -563,6 +582,7 @@ each family, respectively).*
             html.H6(id='margin-new-rev'), html.P('EBIT')
         ], className='mini_container',
            id='margin-rev',
+
         ),
         html.Div([
             html.H6(id='margin-new-rev-percent'), html.P('Unique Products')
@@ -574,7 +594,9 @@ each family, respectively).*
         ], className='mini_container',
            id='margin-products',
         ),
-    ], className='row container-display'
+    ], className='row container-display',
+        # style={'border-color': '#ED2222',
+        #        'background-color': '#aec7e8'},
     ),
     html.Div([
         html.Div([
@@ -611,23 +633,25 @@ each family, respectively).*
                         value='Best',
                         labelStyle={'display': 'inline-block'},
                         style={"margin-bottom": "10px"},),
+            html.P('Toggle Violin/Descriptor Data onto EBIT by Product Family:'),
+            daq.BooleanSwitch(
+              id='daq-violin',
+              on=True,
+              style={"margin-bottom": "10px", "margin-left": "0px",
+              'display': 'inline-block'}),
                 ], className='mini_container',
                     id='descriptorBlock',
                 ),
+            html.Div([
+                dcc.Graph(
+                            id='ebit_plot',
+                            figure=make_ebit_plot(production_df)),
+                ], className='mini_container',
+                   id='ebit-family-block'
+                ),
         ], className='row container-display',
         ),
-    html.Div([
-        html.P('Overlay Violin Data:'),
-        daq.BooleanSwitch(
-          id='daq-violin',
-          on=True,
-          style={"margin-bottom": "10px", "margin-left": "0px",
-          'display': 'inline-block'}),
-        dcc.Graph(
-                    id='ebit_plot',
-                    figure=make_ebit_plot(production_df)),
-        ], className='mini_container',
-        ),
+
     html.Div([
         html.Div([
             dcc.Graph(
