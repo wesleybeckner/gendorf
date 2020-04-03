@@ -521,7 +521,8 @@ def calculate_opportunity(quantile=0.9):
 # Describe the layout/ UI of the app
 
 app.layout = html.Div([
-html.H1('Gendorf OpEx Assessment Report - Data Storyboard'),
+html.H1('Gendorf OpEx Assessment'),
+html.H2('Data Storyboard'),
 html.H3(["Product Margin Optimization"]),
 html.Div([
 html.Div([
@@ -697,6 +698,7 @@ each family, respectively).*
                    id='sunburst',
                 ),
             ], className='row container-display',
+               style={'margin-bottom': '50px'},
             ),
 html.H5(["Margin Velocity"]),
 html.Div([
@@ -715,7 +717,7 @@ style={"background-color": "#ffffff",
 html.Div([
 dcc.Markdown('''
 >
-> This section looks at margin velocity by product family and line.
+> Looks at margin velocity by product family and line.
 >
 
 A product can have a very high margin. But if it takes 4x as long to make it
@@ -776,6 +778,7 @@ increasing their Size (production volume)).*
             figure=make_bubble_chart(),
         ),
         ], className='mini_container',
+            style={'margin-bottom': '100px'},
         ),
 html.H3(["Asset Performance Analysis"]),
 html.Div([
@@ -823,6 +826,7 @@ line that runs PSL is E28 and is rated similarly.
         html.Pre(id='slider-data'),
         html.Pre(id='click-data'),
             ], className='mini_container',
+            style={'margin-bottom': '50px'},
             ),
 html.H5(["Line Performance"]),
 html.Div([
@@ -840,7 +844,7 @@ style={"background-color": "#ffffff",
 html.Div([
 dcc.Markdown('''
 >
-> This section quantifies the opportunity in each line in terms of equivalent
+> Quantifies the opportunity in each line in terms of equivalent
 > days of production
 >
 
@@ -923,11 +927,12 @@ chart will pareto out product family areas.
                    id='pie',
                 ),
             ], className='row container-display',
+            style={'margin-bottom': '50px'},
             ),
 html.Div([
 dcc.Markdown('''
 >
->This section identifies where broad distributions are taking place in performance
+>Identifies where broad distributions are taking place in performance
 >
 
 The afformentioned opportunity comes from tightening distributions around rate, yield,
@@ -990,6 +995,7 @@ The bottom chart shows the utilization for all lines in 2019.
                     figure=make_utilization_plot()),
             ], className='mini_container',
                 id='util',
+                style={'margin-bottom': '50px'},
             ),
 html.H5("Potential Line Consolidations"),
 html.Div([
@@ -1006,7 +1012,7 @@ style={"background-color": "#ffffff",
 html.Div([
 dcc.Markdown('''
 >
-> This section uses product overlap and quantile performances to determine
+> Uses product overlap and quantile performances to determine
 > line consolidation feasibility.
 >
 
