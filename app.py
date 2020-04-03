@@ -493,6 +493,7 @@ def make_culprits():
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
+                "xaxis.title": "Contingency Table Score",
     })
     return fig
 
@@ -524,7 +525,7 @@ def calculate_opportunity(quantile=0.9):
 app.layout = html.Div([
 html.H1('Gendorf OpEx Assessment'),
 html.H2('Data Storyboard'),
-html.P(''),
+html.Br(),
 html.H3(["Product Margin Optimization"]),
 html.Div([
 html.Div([
