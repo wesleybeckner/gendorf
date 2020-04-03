@@ -130,8 +130,7 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
         y = local_df.iloc[index]['descriptor'] + ': ' + df.loc[(df[local_df\
             .iloc[index]['descriptor']] == local_df.iloc[index]['group'])]\
             [local_df.iloc[index]['descriptor']]
-        name = '€ {:.0f}, {}'.format(x.median(),
-            local_df.iloc[index]['group'])
+        name = '€ {:.0f}'.format(x.median())
         fig.add_trace(go.Violin(x=y,
                                 y=x,
                                 name=name,
@@ -141,6 +140,7 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
                 "title": 'Adjusted EBITDA by Product Descriptor (Median in Legend)',
+                "yaxis.title": "EBITDA (€)",
                 "height": 400,
                 "margin": dict(
                        l=0,
@@ -269,6 +269,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
             "plot_bgcolor": "#F9F9F9",
             "paper_bgcolor": "#F9F9F9",
             "title": 'Adjusted EBITDA by Product Family',
+            "yaxis.title": "EBITDA (€)",
             "height": 500,
             "margin": dict(
                    l=0,
@@ -523,17 +524,21 @@ def calculate_opportunity(quantile=0.9):
 app.layout = html.Div([
 html.H1('Gendorf OpEx Assessment'),
 html.H2('Data Storyboard'),
+html.P(''),
 html.H3(["Product Margin Optimization"]),
 html.Div([
 html.Div([
 dcc.Markdown('''
-**Key Finding:** There are a fair number of low to negative margin products
+###### Key Finding: ######
+There are a fair number of low to negative margin products
 that should be reviewed. All groups &#150 business, manufacturing, supply
 chain &#150 need to work together to improve these margins by using a combination
 of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
 
 **Implementation Phase:** Caravel partners work with group teams to strategize
-products around margin levers. **Est. Impact € 3.5-6 M/Yr**
+products around margin levers.
+
+### Est. Impact € 3.5-6 M/Yr ###
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
@@ -542,9 +547,9 @@ products around margin levers. **Est. Impact € 3.5-6 M/Yr**
 ),
 html.Div([
 dcc.Markdown('''
->
->Demonstrates margin disparity and product buckets.
->
+
+###### Demonstrates margin disparity and product buckets. ######
+
 
 The default view of the following interactive charts show that of all
 possible combinations of thicknesses, widths, base types, treatments, colors,
@@ -659,7 +664,7 @@ each family, respectively).*
             html.P('Toggle Violin/Descriptor Data onto EBITDA by Product Family:'),
             daq.BooleanSwitch(
               id='daq-violin',
-              on=True,
+              on=False,
               style={"margin-bottom": "10px", "margin-left": "0px",
               'display': 'inline-block'}),
                 ], className='mini_container',
@@ -704,7 +709,8 @@ html.H5(["Margin Velocity"]),
 html.Div([
 html.Div([
 dcc.Markdown('''
-**Key Finding:** There is clear segmentation in line and product families
+###### Key Finding: ######
+There is clear segmentation in line and product families
 in their margin velocity. High EBITDA per Hr product lines should be expanded
 while low EBITDA per Hr product lines should be discontinued or augmented
 with pricing and other levers.
@@ -716,9 +722,8 @@ style={"background-color": "#ffffff",
 ),
 html.Div([
 dcc.Markdown('''
->
-> Looks at margin velocity by product family and line.
->
+###### Looks at margin velocity by product family and line. ######
+
 
 A product can have a very high margin. But if it takes 4x as long to make it
 vs other products the margin velocity, and hence its value, may be much less than
@@ -784,7 +789,8 @@ html.H3(["Asset Performance Analysis"]),
 html.Div([
 html.Div([
 dcc.Markdown('''
-**Key Finding:** If sales can not come through with additional volumes,
+###### Key Finding: ######
+If sales can not come through with additional volumes,
 Lines such as E26, K06 should be considered for Consolidation. There is
 evidence to suggest that consolidating these lines into higher performing
 lines is possible.
@@ -799,9 +805,7 @@ style={"background-color": "#ffffff",
 ),
 html.Div([
 dcc.Markdown('''
->
-> Explores key variables that affect rate, yield, and uptime
->
+###### Explores key variables that affect rate, yield, and uptime ######
 
 In this graphic, scores reflect whether or not a group (line or product family) is
 improving uptime, rate, or yield. The statistical test is similar to that
@@ -832,7 +836,8 @@ html.H5(["Line Performance"]),
 html.Div([
 html.Div([
 dcc.Markdown('''
-**Key Finding:** Newest and most state-of-the-art lines are E27, K06, & K17
+###### Key Finding: ######
+Newest and most state-of-the-art lines are E27, K06, & K17
 with stable yield, uptime, and rate performance relative to the others.
  K40, E26, E28, K10 have the most upside opportunity.
 '''),
@@ -843,10 +848,7 @@ style={"background-color": "#ffffff",
 ),
 html.Div([
 dcc.Markdown('''
->
-> Quantifies the opportunity in each line in terms of equivalent
-> days of production
->
+###### Quantifies the opportunity in each line in terms of equivalent days of production
 
 Unutilized capacity should be monetized. Priority for capturing increased asset
 capability should be on Lines E27, K40 -
@@ -931,9 +933,7 @@ chart will pareto out product family areas.
             ),
 html.Div([
 dcc.Markdown('''
->
->Identifies where broad distributions are taking place in performance
->
+###### Identifies where broad distributions are taking place in performance ######
 
 The afformentioned opportunity comes from tightening distributions around rate, yield,
 and uptime. In the default view, K40 is shown to have
@@ -1001,7 +1001,8 @@ html.H5("Potential Line Consolidations"),
 html.Div([
 html.Div([
 dcc.Markdown('''
-**Key Finding:** The data indicates E26 may be consolidated into E27 and K06 into
+###### Key Finding: ######
+The data indicates E26 may be consolidated into E27 and K06 into
 K40.
 '''),
 ], className='pretty_container',
@@ -1011,10 +1012,7 @@ style={"background-color": "#ffffff",
 ),
 html.Div([
 dcc.Markdown('''
->
-> Uses product overlap and quantile performances to determine
-> line consolidation feasibility.
->
+###### Uses product overlap and quantile performances to determine line consolidation feasibility.
 
 With the given line performances there is an opportunity for
 consolidation. 'Days Needed' are computed from rate, yield and
