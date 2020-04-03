@@ -169,8 +169,7 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
             desc.append(item)
     test = production_df.loc[production_df[col] == val]
     fig = px.sunburst(test, path=desc[:], color='Adjusted EBITDA', title='{}: {}'.format(
-        col, val),
-        color_continuous_scale='RdBu')
+        col, val),)
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
