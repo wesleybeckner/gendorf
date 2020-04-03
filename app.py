@@ -169,11 +169,12 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
             desc.append(item)
     test = production_df.loc[production_df[col] == val]
     fig = px.sunburst(test, path=desc[:], color='Adjusted EBITDA', title='{}: {}'.format(
-        col, val),)
+        col, val),
+        color_continuous_scale=px.colors.sequential.Viridis)
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
+                "title": '(Select in Violin) {}: {}'.format(col,val),
                 "paper_bgcolor": "#F9F9F9",
-                "title": '(Select from Violin) Adjusted EBITDA, {}: {}'.format(col,val),
                 "height": 400,
                 "margin": dict(
                        l=0,
@@ -698,12 +699,19 @@ each family, respectively).*
             ], className='row container-display',
             ),
 html.H5(["Margin Velocity"]),
+html.Div([
+html.Div([
 dcc.Markdown('''
 **Key Finding:** There is clear segmentation in line and product families
 in their margin velocity. High EBITDA per Hr product lines should be expanded
 while low EBITDA per Hr product lines should be discontinued or augmented
 with pricing and other levers.
 '''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain2a',
+),
 html.Div([
 dcc.Markdown('''
 >
@@ -720,7 +728,11 @@ following chart, we would like to prioritize all products appearing to the right
 increasing their Size (production volume)).*
 '''),
 ], className='pretty_container',
-   style={"background-color": "#ffffff"},
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain2b',
+),
+], className='row container-display',
 ),
     html.Div([
         html.Div([
@@ -766,6 +778,8 @@ increasing their Size (production volume)).*
         ], className='mini_container',
         ),
 html.H3(["Asset Performance Analysis"]),
+html.Div([
+html.Div([
 dcc.Markdown('''
 **Key Finding:** If sales can not come through with additional volumes,
 Lines such as E26, K06 should be considered for Consolidation. There is
@@ -775,10 +789,15 @@ lines is possible.
 **Implementation Phase:** Caravel partners will assist in unutilized capacity
 being be monetized. **Est. Impact € 2-4 M/Yr**
 '''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain3a',
+),
 html.Div([
 dcc.Markdown('''
 >
-> This section explores key variables that affect rate, yield, and uptime
+> Explores key variables that affect rate, yield, and uptime
 >
 
 In this graphic, scores reflect whether or not a group (line or product family) is
@@ -791,7 +810,11 @@ instance, PSL has a very negative impact on rate and yield, however, the only
 line that runs PSL is E28 and is rated similarly.
 '''),
 ], className='pretty_container',
-   style={"background-color": "#ffffff"},
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain3b',
+),
+], className='row container-display',
 ),
     html.Div([
         dcc.Graph(
@@ -802,11 +825,18 @@ line that runs PSL is E28 and is rated similarly.
             ], className='mini_container',
             ),
 html.H5(["Line Performance"]),
+html.Div([
+html.Div([
 dcc.Markdown('''
 **Key Finding:** Newest and most state-of-the-art lines are E27, K06, & K17
 with stable yield, uptime, and rate performance relative to the others.
  K40, E26, E28, K10 have the most upside opportunity.
 '''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain4a',
+),
 html.Div([
 dcc.Markdown('''
 >
@@ -829,7 +859,11 @@ in relation to rate, yield, and uptime. Selecting a line in the Annualized oppor
 chart will pareto out product family areas.
 '''),
 ], className='pretty_container',
-   style={"background-color": "#ffffff"},
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain4b',
+),
+], className='row container-display',
 ),
     html.Div([
         html.Div([
@@ -958,10 +992,17 @@ The bottom chart shows the utilization for all lines in 2019.
                 id='util',
             ),
 html.H5("Potential Line Consolidations"),
+html.Div([
+html.Div([
 dcc.Markdown('''
 **Key Finding:** The data indicates E26 may be consolidated into E27 and K06 into
 K40.
 '''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain6a',
+),
 html.Div([
 dcc.Markdown('''
 >
@@ -982,7 +1023,11 @@ The sunburst chart to the right shows the product overlap for the two
 selected lines.
 '''),
 ], className='pretty_container',
-   style={"background-color": "#ffffff"},
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain6b',
+),
+], className='row container-display',
 ),
     html.Div([
         html.Div([
