@@ -543,7 +543,7 @@ products around margin levers.
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
-          "maxHeight": "300px"},
+          "maxHeight": "350px"},
     id='explain1a',
 ),
 html.Div([
@@ -599,7 +599,7 @@ each family, respectively).*
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
-          "maxHeight": "300px",
+          "maxHeight": "350px",
           "overflow": "scroll"},
    id='explain1b',
 ),
@@ -797,11 +797,13 @@ evidence to suggest that consolidating these lines into higher performing
 lines is possible.
 
 **Implementation Phase:** Caravel partners will assist in unutilized capacity
-being be monetized. **Est. Impact € 2-4 M/Yr**
+being be monetized.
+
+### Est. Impact € 2-4 M/Yr ###
 '''),
 ], className='pretty_container',
 style={"background-color": "#ffffff",
-       "maxHeight": "300px"},
+       "maxHeight": "350px"},
     id='explain3a',
 ),
 html.Div([
@@ -819,7 +821,7 @@ line that runs PSL is E28 and is rated similarly.
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
-          "maxHeight": "300px"},
+          "maxHeight": "350px"},
    id='explain3b',
 ),
 ], className='row container-display',
