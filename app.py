@@ -556,7 +556,7 @@ The default view of the following interactive charts show that of all
 possible combinations of thicknesses, widths, base types, treatments, colors,
 polymers and product groups and families, **53 were statistically influential
 on EBITDA.** Ex: Selecting all products that are described by the 10 most positively
-influential of those descriptors accounts for 102% of EBITDA for 2019 and 20%
+influential of those descriptors accounts for 47% of EBITDA for 2019 and 16%
 of the production volume i.e. a significant production effort is spent on
 products that do not give a positive contribution to EBITDA. **All 53 descriptors
 are made available here.**
