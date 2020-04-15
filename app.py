@@ -58,6 +58,19 @@ production_df = production_df.sort_values(['Product Family', 'EBIT'],
 
 stat_df = pd.read_csv('data/category_stats.csv')
 old_products = df[descriptors].sum(axis=1).unique().shape[0]
+weight_match = pd.read_csv('data/weight_match.csv')
+
+def make_bubble_chart(x='EBITDA per Hr Rank', y='Adjusted EBITDA', color='Line',
+                      size='Net Sales Quantity in KG'):
+
+    fig = px.scatter(weight_match, x=x, y=y, color=color, size=size)
+    fig.update_layout({
+                "plot_bgcolor": "#F9F9F9",
+                "paper_bgcolor": "#F9F9F9",
+                # "title": 'EBIT by Product Descriptor',
+                })
+
+    return fig
 
 def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
     if sort == 'Best':
@@ -74,6 +87,7 @@ def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
             x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
                 local_df.iloc[index]['group'])]
             new_df = pd.concat([new_df, x])
+        new_df = new_df.drop_duplicates()
     else:
 
         new_df = df
@@ -81,19 +95,20 @@ def calculate_margin_opportunity(sort='Worst', select=[0,10], descriptors=None):
             new_df = new_df.loc[~(new_df[local_df.iloc[index]['descriptor']] ==\
                     local_df.iloc[index]['group'])]
 
-    new_EBIT = 1 / (new_df['Sales Quantity in KG'].sum() /
-        df['Sales Quantity in KG'].sum()) * new_df['EBIT'].sum()
+    new_EBITDA = new_df['Adjusted EBITDA'].sum()
+    EBITDA_percent = new_EBITDA / df['Adjusted EBITDA'].sum() * 100
 
-    EBIT_percent = (new_df['EBIT'].sum()) / df['EBIT'].sum() * 100
     new_products = new_df[descriptors].sum(axis=1).unique().shape[0]
+
     product_percent_reduction = (new_products) / \
         old_products * 100
+
     new_kg = new_df['Sales Quantity in KG'].sum()
     old_kg = df['Sales Quantity in KG'].sum()
     kg_percent = new_kg / old_kg * 100
 
-    return "${:.1f} M of ${:.1f} M ({:.1f}%)".format(new_df['EBIT'].sum()/1e6,
-                df['EBIT'].sum()/1e6, EBIT_percent), \
+    return "€{:.1f} M of €{:.1f} M ({:.1f}%)".format(new_EBITDA/1e6,
+                df['Adjusted EBITDA'].sum()/1e6, EBITDA_percent), \
             "{} of {} Products ({:.1f}%)".format(new_products,old_products,
                 product_percent_reduction),\
             "{:.1f} M of {:.1f} M kg ({:.1f}%)".format(new_kg/1e6, old_kg/1e6,
@@ -111,12 +126,11 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
     fig = go.Figure()
     for index in range(select[0],select[1]):
         x = df.loc[(df[local_df.iloc[index]['descriptor']] == \
-            local_df.iloc[index]['group'])]['EBIT']
+            local_df.iloc[index]['group'])]['Adjusted EBITDA']
         y = local_df.iloc[index]['descriptor'] + ': ' + df.loc[(df[local_df\
             .iloc[index]['descriptor']] == local_df.iloc[index]['group'])]\
             [local_df.iloc[index]['descriptor']]
-        name = 'EBIT: {:.0f}, {}'.format(x.median(),
-            local_df.iloc[index]['group'])
+        name = '€ {:.0f}'.format(x.median())
         fig.add_trace(go.Violin(x=y,
                                 y=x,
                                 name=name,
@@ -125,7 +139,16 @@ def make_violin_plot(sort='Worst', select=[0,10], descriptors=None):
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT by Product Descriptor',
+                "title": 'Adjusted EBITDA by Product Descriptor (Median in Legend)',
+                "yaxis.title": "EBITDA (€)",
+                "height": 400,
+                "margin": dict(
+                       l=0,
+                       r=0,
+                       b=0,
+                       t=30,
+                       pad=4
+   ),
                 })
 
     return fig
@@ -145,13 +168,21 @@ def make_sunburst_plot(clickData=None, toAdd=None, col=None, val=None):
         for item in toAdd:
             desc.append(item)
     test = production_df.loc[production_df[col] == val]
-    fig = px.sunburst(test, path=desc[:], color='EBIT', title='{}: {}'.format(
+    fig = px.sunburst(test, path=desc[:], color='Adjusted EBITDA', title='{}: {}'.format(
         col, val),
-        color_continuous_scale='RdBu')
+        color_continuous_scale=px.colors.sequential.Viridis)
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
+                "title": '(Select in Violin) {}: {}'.format(col,val),
                 "paper_bgcolor": "#F9F9F9",
-                "title": 'EBIT, {}: {}'.format(col,val),
+                "height": 400,
+                "margin": dict(
+                       l=0,
+                       r=0,
+                       b=0,
+                       t=30,
+                       pad=4
+   ),
                 })
     return fig
 
@@ -171,7 +202,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 production_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
                 color_discrete_map=color_dic,
                 opacity=1).data:
@@ -185,7 +216,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 production_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
 
                 color_discrete_map=color_dic,
@@ -212,7 +243,7 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
         for data in px.scatter(
                 new_df,
                 x='product',
-                y='EBIT',
+                y='Adjusted EBITDA',
                 color='Product Family',
 
                 color_discrete_map=color_dic,
@@ -237,8 +268,20 @@ def make_ebit_plot(production_df, select=None, sort='Worst', descriptors=None):
     fig.update_layout({
             "plot_bgcolor": "#F9F9F9",
             "paper_bgcolor": "#F9F9F9",
-            "title": 'EBIT by Product Family',
-            "height": 750,
+            "title": 'Adjusted EBITDA by Product Family',
+            "yaxis.title": "EBITDA (€)",
+            "height": 500,
+            "margin": dict(
+                   l=0,
+                   r=0,
+                   b=0,
+                   t=30,
+                   pad=4
+),
+            "xaxis.tickfont.size": 8,
+            # "font":dict(
+            #     size=8,
+            # ),
             })
     return fig
 
@@ -282,7 +325,7 @@ def make_product_sunburst(lines=['E27', 'E26']):
      })
     return fig
 
-def make_metric_plot(line='K40', pareto='Product', marginal='rug'):
+def make_metric_plot(line='K40', pareto='Product', marginal='histogram'):
     plot = oee.loc[oee['Line'] == line]
     plot = plot.sort_values('Thickness Material A')
     plot['Thickness Material A'] = pd.to_numeric(plot['Thickness Material A'])
@@ -450,6 +493,7 @@ def make_culprits():
     fig.update_layout({
                 "plot_bgcolor": "#F9F9F9",
                 "paper_bgcolor": "#F9F9F9",
+                "xaxis.title": "Contingency Table Score",
     })
     return fig
 
@@ -479,19 +523,94 @@ def calculate_opportunity(quantile=0.9):
 # Describe the layout/ UI of the app
 
 app.layout = html.Div([
-    html.H3(["Margin Analysis"]),
-    html.P("Product descriptors are sorted by best or worst EBIT medians. "\
-        "Selecting these descriptors automatically computes annualized EBIT. "\
-        "For example, selecting the best 10 descriptors accounts for 102% of "\
-        "the annual EBIT, 7% of available products, and 19% of the total "\
-        "production volume. Conversely, eliminating the 10 worst descriptor "\
-        "products results in a remaining product portfolio that accounts for "\
-        "168% of EBIT, 77% of products, and 84% of volume."),
+html.H1('Gendorf OpEx Assessment'),
+html.H2('Data Storyboard'),
+html.Br(),
+html.H3(["Product Margin Optimization"]),
+html.Div([
+html.Div([
+dcc.Markdown('''
+###### Key Finding: ######
+There are a fair number of low to negative margin products
+that should be reviewed. All groups &#150 business, manufacturing, supply
+chain &#150 need to work together to improve these margins by using a combination
+of potential levers: Price Increase, Production Rules, Minimum Order Sizes, Campaigning, etc.
+
+**Implementation Phase:** Caravel partners work with group teams to strategize
+products around margin levers.
+
+### Est. Impact € 3.5-6 M/Yr ###
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "350px"},
+    id='explain1a',
+),
+html.Div([
+dcc.Markdown('''
+
+###### Demonstrates margin disparity and product buckets. ######
+
+
+The default view of the following interactive charts show that of all
+possible combinations of thicknesses, widths, base types, treatments, colors,
+polymers and product groups and families, **53 were statistically influential
+on EBITDA.** Ex: Selecting all products that are described by the 10 most positively
+influential of those descriptors accounts for 47% of EBITDA for 2019 and 16%
+of the production volume i.e. a significant production effort is spent on
+products that do not give a positive contribution to EBITDA. **All 53 descriptors
+are made available here.**
+
+------
+
+* Descriptors can be selected from eight categories:
+    * thickness, width, base type, treatment, color, polymer, product family & group
+* Descriptors are sorted by either best (describe high EBITDA products) or
+worst (describe low EBITDA products)
+* The range bar updates what descriptors are shown in the violin plot and EBITDA
+by Product Family Plot as well as what is calculated in EBITDA, unique products, and volume displays
+
+------
+
+A violin plot of EBITDA values is constructed of each descriptor
+selected by the range bar. A violin plot is a method of plotting
+distributions. It is similar to a box plot, with the addition of a rotated
+kernel density (kde) plot on each side. **The benefit of the kde is to visualize
+the density of the data without obstructing key outliers** *(ex: 200-400K EBITDA
+outliers in 2D Coil Coating and Base Type 153/07)*
+
+Clicking on a distribution in the violin
+plot expands the sunburst chart to its right. A sunburst chart is a way of
+representing hierarchical data structures. In this case it is showing the
+product breakdown for a given descriptor. For instance, products with base
+types of 202/14 fall within the Construction category, with PVC polymer, ZZZ
+treatment, and OP color. The bandwidths that lie on each ring indicate the
+production volume fraction for that given descriptor while color indicates
+the average EBITDA for all products described by that section of the sunburst *(ex:
+in the default view, highest EBITDA base type 202/14 products have a width of 955
+while lowest EBITDA have a width of 400 and each of these count for 1 production
+run out of 23 for this product group).* Thickness and width can be toggled on the sunburst chart for clarity.
+
+Descriptors in the violin plot are overlayed onto the EBITDA by Product Family
+chart. In this way, product descriptors can be evaluated within the broader portfolio
+*(ex: toggling the best/worst rank selector above
+will alternate highlighting the high margin and negative margin products within
+each family, respectively).*
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "350px",
+          "overflow": "scroll"},
+   id='explain1b',
+),
+], className='row container-display',
+),
     html.Div([
         html.Div([
-            html.H6(id='margin-new-rev'), html.P('EBIT')
+            html.H6(id='margin-new-rev'), html.P('Adjusted EBITDA')
         ], className='mini_container',
            id='margin-rev',
+
         ),
         html.Div([
             html.H6(id='margin-new-rev-percent'), html.P('Unique Products')
@@ -503,7 +622,9 @@ app.layout = html.Div([
         ], className='mini_container',
            id='margin-products',
         ),
-    ], className='row container-display'
+    ], className='row container-display',
+        # style={'border-color': '#ED2222',
+        #        'background-color': '#aec7e8'},
     ),
     html.Div([
         html.Div([
@@ -535,16 +656,31 @@ app.layout = html.Div([
             html.P('Sort by:'),
             dcc.RadioItems(
                         id='sort',
-                        options=[{'label': i, 'value': i} for i in \
-                                ['Best', 'Worst']],
+                        options=[{'label': i, 'value': j} for i, j in \
+                                [['Low EBITDA', 'Worst'],
+                                ['High EBITDA', 'Best']]],
                         value='Best',
                         labelStyle={'display': 'inline-block'},
                         style={"margin-bottom": "10px"},),
+            html.P('Toggle Violin/Descriptor Data onto EBITDA by Product Family:'),
+            daq.BooleanSwitch(
+              id='daq-violin',
+              on=False,
+              style={"margin-bottom": "10px", "margin-left": "0px",
+              'display': 'inline-block'}),
                 ], className='mini_container',
                     id='descriptorBlock',
                 ),
+            html.Div([
+                dcc.Graph(
+                            id='ebit_plot',
+                            figure=make_ebit_plot(production_df)),
+                ], className='mini_container',
+                   id='ebit-family-block'
+                ),
         ], className='row container-display',
         ),
+
     html.Div([
         html.Div([
             dcc.Graph(
@@ -568,27 +704,136 @@ app.layout = html.Div([
                    id='sunburst',
                 ),
             ], className='row container-display',
+               style={'margin-bottom': '50px'},
             ),
+html.H5(["Margin Velocity"]),
+html.Div([
+html.Div([
+dcc.Markdown('''
+###### Key Finding: ######
+There is clear segmentation in line and product families
+in their margin velocity. High EBITDA per Hr product lines should be expanded
+while low EBITDA per Hr product lines should be discontinued or augmented
+with pricing and other levers.
+'''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain2a',
+),
+html.Div([
+dcc.Markdown('''
+###### Looks at margin velocity by product family and line. ######
+
+
+A product can have a very high margin. But if it takes 4x as long to make it
+vs other products the margin velocity, and hence its value, may be much less than
+previously thought.
+Margin velocity gives you a sense of which products should be growing and
+which ones should be removed *(ex: in the default view of the
+following chart, we would like to prioritize all products appearing to the right,
+(high EBITDA per Hr) pushing them further up the y-axis (Adjusted EBITDA) by
+increasing their Size (production volume)).*
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain2b',
+),
+], className='row container-display',
+),
     html.Div([
-        html.P('Overlay Violin Data:'),
-        daq.BooleanSwitch(
-          id='daq-violin',
-          on=True,
-          style={"margin-bottom": "10px", "margin-left": "0px",
-          'display': 'inline-block'}),
-        dcc.Graph(
-                    id='ebit_plot',
-                    figure=make_ebit_plot(production_df)),
-            ], className='mini_container',
+        html.Div([
+            html.Div([
+                html.P('X-axis'),
+                dcc.Dropdown(id='x-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['Rate', 'Yield', 'EBITDA per Hr Rank',\
+                                         'Adjusted EBITDA', 'Net Sales Quantity in KG']],
+                            value='EBITDA per Hr Rank',),
+                     ],  className='mini_container',
+                         id='x-select-box',
+                     ),
+            html.Div([
+                html.P('Y-axis'),
+                dcc.Dropdown(id='y-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['EBITDA per Hr', 'Adjusted EBITDA',\
+                                         'Net Sales Quantity in KG']],
+                            value='Adjusted EBITDA',),
+                    ],className='mini_container',
+                      id='y-select-box',
+                    ),
+            html.Div([
+                html.P('Color'),
+                dcc.Dropdown(id='color-select',
+                             options=[{'label': i, 'value': i} for i in \
+                                        ['Line', 'Thickness Material A',\
+                                         'Width Material Attri', 'Product Family']],
+                            value='Line',),
+                    ],className='mini_container',
+                      id='color-select-box',
+                    ),
+            ], className='row container-display',
             ),
-    html.H3(["Asset Performance"]),
-    html.H4("Variables to Consider"),
-    html.P("Scores reflect whether a group (line or product family) is "\
-           "improving or degrading the indicated metric (uptime, rate, yield). "\
-           "While groups were determined to be statistically impactful "\
-           "(null hypothesis < 0.01) it does not guarantee decoupling. For "\
-           "instance, PSL has a very negative impact on rate and yield. "\
-           "However, the only line that runs PSL is E28, which is rated similarly."),
+        ],
+        ),
+    html.Div([
+        dcc.Graph(
+            id='bubble_plot',
+            figure=make_bubble_chart(),
+        ),
+        ], className='mini_container',
+            style={'margin-bottom': '100px'},
+        ),
+html.H3(["Asset Performance Analysis"]),
+html.Div([
+html.Div([
+dcc.Markdown('''
+###### Key Finding: ######
+If sales can not come through with additional volumes,
+Lines such as E26, K06 should be considered for consolidation. There is
+evidence to suggest that consolidating these lines into higher performing
+lines is possible.
+
+**Implementation Phase:** Caravel partners will assist in unutilized capacity
+being be monetized.
+
+### Est. Impact € 2-4 M/Yr ###
+'''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "350px"},
+    id='explain3a',
+),
+html.Div([
+dcc.Markdown('''
+###### Explores key variables that affect rate, yield, and uptime ######
+
+In this graphic, scores reflect whether or not a group (line or product family) is
+improving uptime, rate, or yield. The statistical test is similar to that
+performed for the product descriptors in the margin analysis. Based on Mood's Median, the
+grand median for all data is computed and then a contingency table is made with
+the observed variables.
+The score metric is the ratio of two ratios: ((M1X)/(M2X)) / ((M1Y)/(M2Y)). where M1X are the
+fraction of observed cases (in x-axis category) above the grand median,
+M2X the fraction of observed cases (in x-axis category) below the grand median,
+M1Y the fraction of observed cases (all other categories) above the grand median, &
+M2Y the fraction of observed cases (all other categories) below the grand median.
+In so doing the x-axis category is compared to the rest of the production data. Take for instance
+the uptime for Dec. Surface/others. While producing these products you are 19x
+more likely to be up than while producing any other product. While all line/product
+families were assessed in this analysis only those with p-value < 0.01 were
+represented here. for more information on
+Moods Median testing [click here](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.median_test.html).
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "350px"},
+   id='explain3b',
+),
+], className='row container-display',
+),
     html.Div([
         dcc.Graph(
                     id='scores_plot',
@@ -596,18 +841,51 @@ app.layout = html.Div([
         html.Pre(id='slider-data'),
         html.Pre(id='click-data'),
             ], className='mini_container',
+            style={'margin-bottom': '50px'},
             ),
-    html.H4(["Opportunity"]),
-    html.P("Opportunity (days of additional production) is computed from "\
-            "distributions around uptime, yield, and rate with respect to "\
-            "each of the lines and their product families. Some lines perform "\
-            "very well (E27 and K06) and already perform near their upper "\
-            "quantile ranges. Other lines (K10, E28) have a lot of hidden "\
-            "capacity due to wide variability in their operation. The "\
-            "additional days of production should be interpreted as untapped "\
-            "potential. For instance, If all lines were to perform in their "\
-            "0.82 quantile bracket, the plant would gain the equivalent of "\
-            "running an additional line for an entire calendar year.  "),
+html.H5(["Line Performance"]),
+html.Div([
+html.Div([
+dcc.Markdown('''
+###### Key Finding: ######
+Newest and most state-of-the-art lines are E27, K06, & K17
+with stable yield, uptime, and rate performance relative to the others.
+ K40, E26, E28, K10 have the most upside opportunity.
+'''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain4a',
+),
+html.Div([
+dcc.Markdown('''
+###### Quantifies the opportunity in each line in terms of equivalent days of production
+
+Unutilized capacity should be monetized. Priority for capturing increased asset
+capability should be on Lines E27, K40 -
+This will take a sharper focus on true continuous improvement.
+The organization tracks daily operating parameters, but there does not appear
+to be a concerted effort with a project mentality on thinking in strategical
+improvement terms to capture hidden plant opportunities (increases in yield, uptime and rate).
+
+------
+
+In the following charts, selecting a quantile on the range bar will move the observed
+values for that line/metric/product family so that the grand median is now at the quantile of
+the original distribution. This new distribution is then used to run a hypothetical year
+with the same amount of kg produced. This will result in a shorten amount of days run.
+The additional days gained is the difference of the new amount and the old.
+This analysis is effectively saying, I know I can perform at this metric because
+I have done it before, what if I were to more consistently achieve this performance level.
+
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain4b',
+),
+], className='row container-display',
+),
     html.Div([
         html.Div([
             html.H6(id='new-rev'), html.P('Total Days of Production Saved')
@@ -615,17 +893,17 @@ app.layout = html.Div([
            id='rev',
         ),
         html.Div([
-            html.H6(id='new-rev-percent'), html.P('Rate (days)')
+            html.H6(id='new-rev-percent'), html.P('days achieved due to rate')
         ], className='mini_container',
            id='rev-percent',
         ),
         html.Div([
-            html.H6(id='new-products'), html.P('Yield (days)')
+            html.H6(id='new-products'), html.P('days achieved due to yield')
         ], className='mini_container',
            id='products',
         ),
         html.Div([
-            html.H6(id='new-products-percent'), html.P('Uptime (days)')
+            html.H6(id='new-products-percent'), html.P('days achieved due to uptime')
         ], className='mini_container',
            id='products-percent',
         ),
@@ -666,8 +944,22 @@ app.layout = html.Div([
                    id='pie',
                 ),
             ], className='row container-display',
+            style={'margin-bottom': '50px'},
             ),
-    html.H4("Rate, Yield, & Uptime"),
+html.Div([
+dcc.Markdown('''
+###### Identifies where broad distributions are taking place in performance ######
+
+The afformentioned opportunity comes from tightening distributions around rate, yield,
+and uptime. In the default view, K40 is shown to have
+wide distributions around rate and yield. Switching the Line view to E27 will
+show how this contrasts with a much better performing line.
+
+The bottom chart shows the utilization for all lines in 2019.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff"},
+),
     html.Div([
         html.Div([
             html.Div([
@@ -696,7 +988,7 @@ app.layout = html.Div([
                                      {'label': 'Box', 'value': 'box'},
                                      {'label': 'Violin', 'value': 'violin'},
                                     {'label': 'Histogram', 'value': 'histogram'}],
-                            value='none',
+                            value='histogram',
                              style={'width': '120px'}),
                     ],className='mini_container',
                       id='marginal-box',
@@ -718,16 +1010,44 @@ app.layout = html.Div([
                     figure=make_utilization_plot()),
             ], className='mini_container',
                 id='util',
+                style={'margin-bottom': '50px'},
             ),
-    html.H4("Line Consolidation"),
-    html.P("With the given line performances there is an opportunity for "\
-            "consolidation. 'Days Needed' are computed from rate, yield and "\
-            "the total production for 'Line to Remove' in 2019. "\
-            "'Days Available' is computed from rate, yield, and uptime "\
-            "improvements in 'Line to Overload'. A manual overide is "\
-            "available to remove uptime consideration. In this case, uptime "\
-            "can be manually inputed, with a maximum value based on the "\
-            "downtime days for that line in 2019."),
+html.H5("Potential Line Consolidations"),
+html.Div([
+html.Div([
+dcc.Markdown('''
+###### Key Finding: ######
+The data indicates E26 may be consolidated into E27 and K06 into
+K40.
+'''),
+], className='pretty_container',
+style={"background-color": "#ffffff",
+       "maxHeight": "300px"},
+    id='explain6a',
+),
+html.Div([
+dcc.Markdown('''
+###### Uses product overlap and quantile performances to determine line consolidation feasibility.
+
+With the given line performances there is an opportunity for
+consolidation. 'Days Needed' are computed from rate, yield and
+the total production for 'Line to Remove' in 2019.
+'Days Available' is computed from rate, yield, and uptime
+improvements in 'Line to Overload'. A manual overide is
+available to remove uptime consideration. In this case, uptime
+can be manually inputed, with a maximum value based on the
+downtime days for that line in 2019.
+
+The sunburst chart to the right shows the product overlap for the two
+selected lines.
+'''),
+], className='pretty_container',
+   style={"background-color": "#ffffff",
+          "maxHeight": "300px"},
+   id='explain6b',
+),
+], className='row container-display',
+),
     html.Div([
         html.Div([
             html.Div([
@@ -869,6 +1189,15 @@ def display_opportunity(sort, select, descriptors):
 )
 def display_opportunity(line, pareto, marginal):
     return make_metric_plot(line, pareto, marginal)
+
+@app.callback(
+    Output('bubble_plot', 'figure'),
+    [Input('x-select', 'value'),
+    Input('y-select', 'value'),
+    Input('color-select', 'value')]
+)
+def display_opportunity(x, y, color):
+    return make_bubble_chart(x, y, color)
 
 @app.callback(
     [Output('new-rev', 'children'),
