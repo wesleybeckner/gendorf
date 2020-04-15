@@ -792,7 +792,7 @@ html.Div([
 dcc.Markdown('''
 ###### Key Finding: ######
 If sales can not come through with additional volumes,
-Lines such as E26, K06 should be considered for Consolidation. There is
+Lines such as E26, K06 should be considered for consolidation. There is
 evidence to suggest that consolidating these lines into higher performing
 lines is possible.
 
@@ -812,12 +812,20 @@ dcc.Markdown('''
 
 In this graphic, scores reflect whether or not a group (line or product family) is
 improving uptime, rate, or yield. The statistical test is similar to that
-performed for the product descriptors in the margin analysis.
-
-While groups were determined to be statistically impactful
-(null hypothesis < 0.01) it does not guarantee decoupling. For
-instance, PSL has a very negative impact on rate and yield, however, the only
-line that runs PSL is E28 and is rated similarly.
+performed for the product descriptors in the margin analysis. Based on Mood's Median, the
+grand median for all data is computed and then a contingency table is made with
+the observed variables.
+The score metric is the ratio of two ratios: ((M1X)/(M2X)) / ((M1Y)/(M2Y)). where M1X are the
+fraction of observed cases (in x-axis category) above the grand median,
+M2X the fraction of observed cases (in x-axis category) below the grand median,
+M1Y the fraction of observed cases (all other categories) above the grand median, &
+M2Y the fraction of observed cases (all other categories) below the grand median.
+In so doing the x-axis category is compared to the rest of the production data. Take for instance
+the uptime for Dec. Surface/others. While producing these products you are 19x
+more likely to be up than while producing any other product. While all line/product
+families were assessed in this analysis only those with p-value < 0.01 were
+represented here. for more information on
+Moods Median testing [click here](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.median_test.html).
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
@@ -862,10 +870,14 @@ improvement terms to capture hidden plant opportunities (increases in yield, upt
 
 ------
 
-In the following charts, selecting a quantile on the range bar will update
-the predicted upside. This effectively pushes each line into its upper quantiles
-in relation to rate, yield, and uptime. Selecting a line in the Annualized opportunity
-chart will pareto out product family areas.
+In the following charts, selecting a quantile on the range bar will move the observed
+values for that line/metric/product family so that the grand median is now at the quantile of
+the original distribution. This new distribution is then used to run a hypothetical year
+with the same amount of kg produced. This will result in a shorten amount of days run.
+The additional days gained is the difference of the new amount and the old.
+This analysis is effectively saying, I know I can perform at this metric because
+I have done it before, what if I were to more consistently achieve this performance level.
+
 '''),
 ], className='pretty_container',
    style={"background-color": "#ffffff",
@@ -881,17 +893,17 @@ chart will pareto out product family areas.
            id='rev',
         ),
         html.Div([
-            html.H6(id='new-rev-percent'), html.P('Rate (days)')
+            html.H6(id='new-rev-percent'), html.P('days achieved due to rate')
         ], className='mini_container',
            id='rev-percent',
         ),
         html.Div([
-            html.H6(id='new-products'), html.P('Yield (days)')
+            html.H6(id='new-products'), html.P('days achieved due to yield')
         ], className='mini_container',
            id='products',
         ),
         html.Div([
-            html.H6(id='new-products-percent'), html.P('Uptime (days)')
+            html.H6(id='new-products-percent'), html.P('days achieved due to uptime')
         ], className='mini_container',
            id='products-percent',
         ),
